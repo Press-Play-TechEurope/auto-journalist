@@ -10,7 +10,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 export const metadata: Metadata = {
   title: { default: "Press Play", template: "%s — Press Play" },
   description:
-    "Press Play turns news articles and tech announcements into short talking-head videos you'll actually watch. News for the masses — articles in, vibes out.",
+    "Press Play turns the news in your feeds into short, captioned talking-head videos ready to post — script, caption and presenter included. Articles in, posts out.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

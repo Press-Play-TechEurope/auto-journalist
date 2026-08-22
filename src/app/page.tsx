@@ -144,32 +144,33 @@ export default function LandingPage() {
             <ArrowRight className="size-3" />
           </Link>
           <h1 className="animate-in fade-in slide-in-from-bottom-3 mt-7 max-w-3xl font-serif text-[44px] leading-[1.02] tracking-[-0.02em] text-balance delay-100 duration-500 sm:text-7xl">
-            Everything that happened today, in about a minute
+            Post about today&rsquo;s news without filming today
           </h1>
           <p className="animate-in fade-in slide-in-from-bottom-4 mt-6 max-w-lg text-[15px] leading-relaxed text-balance text-white/75 delay-200 duration-500 sm:text-base">
-            Press Play reads the articles, writes the script and puts a
-            presenter on camera. News and tech for the masses — articles in,
-            vibes out.
+            Press Play pulls the stories from your feeds, writes the script and
+            the caption, and renders a subtitled talking-head video — with your
+            face or one of ours. You just hit post.
           </p>
           <div className="animate-in fade-in slide-in-from-bottom-5 mt-8 delay-300 duration-500">
             <PillLink href="/feed" tone="lime">
-              Enter the newsroom
+              Open your newsroom
             </PillLink>
           </div>
         </div>
       </section>
 
-      {/* ======================= WATCH MORE, READ LESS ==================== */}
+      {/* ======================== POST MORE, FILM LESS ==================== */}
       <section
         id="how-it-works"
         className="relative mx-auto w-full max-w-6xl px-4 pt-8 pb-24 sm:px-6 sm:pt-12"
       >
         <h2 className="font-serif text-[34px] leading-tight tracking-tight sm:text-5xl">
-          Watch more, read less
+          Post more, film less
         </h2>
         <p className="mt-3 max-w-md text-[15px] text-slate-500">
-          Press Play keeps you <span className="text-slate-900">informed</span>{" "}
-          without the 40-tab browser session, the paywalls or the jargon.
+          Press Play keeps your channel{" "}
+          <span className="text-slate-900">current</span> without the research
+          rabbit hole, the script writing or the reshoots.
         </p>
 
         <div className="relative mt-12">
@@ -185,14 +186,12 @@ export default function LandingPage() {
             <Newspaper className="size-3.5" />
           </span>
           <p className="max-w-md text-[15px] text-slate-600">
-            <span className="text-slate-900">
-              Find the story behind the headline
-            </span>{" "}
-            with the sources, the context and the &ldquo;why it matters&rdquo;
-            in one place.
+            <span className="text-slate-900">Never run dry.</span> Every feed
+            you follow becomes a queue of stories worth a video, sorted by what
+            just dropped.
           </p>
           <PillLink href="/feed" tone="light" className="sm:ml-auto">
-            Explore
+            See the feed
           </PillLink>
         </div>
 
@@ -206,11 +205,12 @@ export default function LandingPage() {
               Read
             </div>
             <h3 className="mt-2 font-serif text-2xl tracking-tight">
-              We read the news so you don&rsquo;t have to
+              We read the feeds so you can post
             </h3>
             <p className="mt-2 max-w-sm text-[14px] text-slate-500">
-              We hoover up articles and announcements from the sources that
-              matter, then pick the ones worth your minute.
+              Add the sources your audience cares about. We pull the articles,
+              the images and the context, then line up the ones worth your next
+              post.
             </p>
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white">
               <ReadMock />
@@ -224,11 +224,11 @@ export default function LandingPage() {
               Write
             </div>
             <h3 className="mt-2 font-serif text-2xl tracking-tight">
-              AI writes the script
+              The script and the caption, already written
             </h3>
             <p className="mt-2 max-w-sm text-[14px] text-slate-500">
-              Dense press release in, snappy script out. Jargon gets benched,
-              the point gets made.
+              Dense press release in, 45-second script and social caption out —
+              in your tone, at your length. Edit a line, regenerate, done.
             </p>
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white">
               <WriteMock />
@@ -246,21 +246,22 @@ export default function LandingPage() {
         <DotHourglass className="absolute top-1/2 left-1/2 -z-10 w-[min(100vw,820px)] -translate-x-1/2 -translate-y-1/2 opacity-80" />
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-40 pb-36 text-center sm:px-6">
           <p className="max-w-xl text-[17px] text-balance sm:text-xl">
-            The average person spends{" "}
-            <span className="font-serif text-2xl sm:text-3xl">2h 24m</span> a
-            day scrolling the news and still can&rsquo;t explain it at dinner
+            A 60-second explainer takes about{" "}
+            <span className="font-serif text-2xl sm:text-3xl">3 hours</span> to
+            research, write, film, cut and caption. The news moves faster than
+            that.
           </p>
           <PillLink href="/feed" tone="lime" className="mt-8 h-8 text-[12px]">
-            Start watching instead
+            Skip to publish
           </PillLink>
         </div>
       </section>
 
       {/* ========================= GET THE GIST =========================== */}
       <section className="relative mx-auto w-full max-w-6xl px-4 pt-24 pb-20 sm:px-6">
-        <Eyebrow icon={Sparkles}>Get the gist</Eyebrow>
+        <Eyebrow icon={Sparkles}>Explain it</Eyebrow>
         <h2 className="mt-5 font-serif text-[34px] leading-tight tracking-tight sm:text-5xl">
-          Understand tech in <span className="italic">∞</span> less time
+          Explain tech in <span className="italic">∞</span> less time
         </h2>
 
         <div className="relative mt-12">
@@ -271,19 +272,19 @@ export default function LandingPage() {
               <p className="text-[15px] leading-relaxed text-slate-500">
                 Dense press releases, earnings calls and policy PDFs become{" "}
                 <span className="text-slate-900">
-                  scripts your group chat would actually read
+                  scripts your audience will actually finish
                 </span>
-                , delivered by a face you&rsquo;ll actually watch.
+                , delivered by a face they&rsquo;ll actually watch.
               </p>
               <PillLink href="/feed" tone="light" className="mt-6">
-                Learn more
+                See how it works
               </PillLink>
             </div>
           </div>
         </div>
 
         <div className="mt-20 flex flex-wrap items-center justify-center gap-3 text-[15px]">
-          <span>Stories across</span>
+          <span>Cover beats across</span>
           <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[13px] shadow-sm">
             <span className="flex size-5 items-center justify-center rounded-md bg-blue-600 text-white">
               <Sparkles className="size-3" />
@@ -301,15 +302,15 @@ export default function LandingPage() {
         <div>
           <Eyebrow icon={Mic}>Presenters</Eyebrow>
           <h2 className="mt-5 font-serif text-[34px] leading-tight tracking-tight sm:text-5xl">
-            Meet the talking heads
+            Your face, or one of ours
           </h2>
           <p className="mt-3 max-w-sm text-[15px] text-slate-500">
-            Real faces and AI-rendered ones, each with their own ElevenLabs
-            voice. Pick who delivers the story, swap mid-draft, no lecture hall
-            required.
+            Use your own photo and voice, or one of our AI presenters. Swap the
+            presenter mid-draft, swap the voice per video — no camera, no ring
+            light, no reshoots.
           </p>
           <PillLink href="/feed" tone="dark" className="mt-7">
-            Get started
+            Pick a presenter
           </PillLink>
           <p className="mt-10 flex items-center gap-2 text-[12px] text-slate-400">
             <Clapperboard className="size-3.5" />
@@ -322,16 +323,15 @@ export default function LandingPage() {
       {/* ============================== STATS ============================ */}
       <section className="mx-auto w-full max-w-6xl px-4 pb-28 sm:px-6">
         <p className="max-w-lg font-serif text-[26px] leading-snug tracking-tight text-slate-500 sm:text-3xl">
-          <span className="text-blue-600">People who use Press Play</span>{" "}
-          <span className="text-slate-900">understand more</span> and doomscroll
-          less.
+          <span className="text-blue-600">Creators on Press Play</span>{" "}
+          <span className="text-slate-900">post more</span> and film less.
         </p>
         <div className="mt-12 grid gap-10 sm:grid-cols-2">
           <div className="flex items-end gap-6">
             <div>
-              <p className="font-serif text-5xl tracking-tight">60s</p>
+              <p className="font-serif text-5xl tracking-tight">~5 min</p>
               <p className="mt-2 text-[13px] text-slate-500">
-                Average story, headline to &ldquo;got it&rdquo;
+                Headline to publish-ready, captioned MP4
               </p>
             </div>
             <svg
@@ -352,7 +352,7 @@ export default function LandingPage() {
             <div>
               <p className="font-serif text-5xl tracking-tight">0</p>
               <p className="mt-2 text-[13px] text-slate-500">
-                Paywalls, jargon or 10-minute reads
+                Cameras, reshoots or caption files
               </p>
             </div>
             <svg
@@ -383,10 +383,10 @@ export default function LandingPage() {
         />
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-40 pb-24 text-center sm:px-6">
           <h2 className="max-w-md font-serif text-[36px] leading-[1.05] tracking-tight text-balance sm:text-5xl">
-            Be ready for whatever happens next
+            Be first on whatever happens next
           </h2>
           <PillLink href="/feed" tone="lime" className="mt-8">
-            Enter the newsroom
+            Open your newsroom
           </PillLink>
         </div>
 
@@ -401,9 +401,9 @@ export default function LandingPage() {
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-[11px] text-white/40">
             <span>
-              © {new Date().getFullYear()} Press Play. Articles in, vibes out.
+              © {new Date().getFullYear()} Press Play. Articles in, posts out.
             </span>
-            <span>An AI newsroom experiment.</span>
+            <span>An AI newsroom for creators.</span>
           </div>
 
           <div className="mt-10 flex items-center gap-4 overflow-hidden text-white/[0.07] select-none">

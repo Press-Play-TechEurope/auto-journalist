@@ -2,11 +2,11 @@
 
 > https://auto-journalist.vercel.app/
 
-The news wasn't built for your brain. We fixed that.
+Post about today's news without filming today.
 
-Press Play is an AI newsroom that turns news articles and tech announcements into short talking-head videos — the kind you'd actually finish watching. No 10-minute reads, no jargon, no 40-tab browser sessions. Just press play.
+Press Play is an AI newsroom for content creators. It pulls stories from the RSS feeds you follow, writes the script and the social caption, and renders a subtitled talking-head video — with your face or one of our presenters — ready to post. No research rabbit hole, no daily filming, no caption files. Just press play.
 
-Made for the masses and the young. Articles in, vibes out.
+Made for creators who post daily. Articles in, posts out.
 
 APIs used:
 - Tavily Extract (for extracting article content and images)
@@ -16,7 +16,7 @@ APIs used:
 
 ## What it does
 
-Press Play is a single-tenant web app (one shared password — it's a newsroom, not a nightclub) that watches the news so you don't have to, then explains it back to you on camera:
+Press Play is a single-tenant web app (one shared password — it's a newsroom, not a nightclub) that watches your feeds so you don't have to, then turns the stories into videos you can post:
 
 1. **Aggregate** — add any number of RSS feeds as sources, optionally grouped into folders (e.g. World, Tech). The app polls them on demand (Refresh button, and automatically on page load when stale) and shows a unified feed sorted by date, filterable by folder and source.
 2. **Enrich** — pick a story and a presenter, click **Generate video**:
