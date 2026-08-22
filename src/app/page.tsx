@@ -31,43 +31,6 @@ const NAV = [
   { href: "#presenters", label: "Presenters" },
 ];
 
-const FOOTER = [
-  {
-    title: "Product",
-    links: [
-      ["Feed", "/feed"],
-      ["Library", "/library"],
-      ["Presenters", "#presenters"],
-      ["How it works", "#how-it-works"],
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      ["About", "#"],
-      ["Careers", "#"],
-      ["Press", "#"],
-      ["Changelog", "#"],
-    ],
-  },
-  {
-    title: "Legal",
-    links: [
-      ["Terms", "#"],
-      ["Privacy", "#"],
-      ["Cookies", "#"],
-    ],
-  },
-  {
-    title: "Connect",
-    links: [
-      ["X (Twitter)", "#"],
-      ["LinkedIn", "#"],
-      ["GitHub", "#"],
-    ],
-  },
-];
-
 /* Shared pieces ---------------------------------------------------------- */
 
 function Eyebrow({
@@ -437,27 +400,7 @@ export default function LandingPage() {
 
         {/* Footer (lives inside the dark band) */}
         <footer className="mx-auto w-full max-w-6xl px-4 pb-10 sm:px-6">
-          <div className="grid grid-cols-2 gap-8 border-t border-white/10 pt-12 text-[12px] sm:grid-cols-4">
-            {FOOTER.map((col) => (
-              <div key={col.title}>
-                <p className="text-white/50">{col.title}</p>
-                <ul className="mt-3 space-y-2">
-                  {col.links.map(([label, href]) => (
-                    <li key={label}>
-                      <Link
-                        href={href!}
-                        className="text-white/85 transition-colors hover:text-white"
-                      >
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-14 flex items-center gap-2 text-[11px] text-white/60">
+          <div className="flex items-center gap-2 border-t border-white/10 pt-10 text-[11px] text-white/60">
             <span className="flex items-center gap-1.5 rounded-full border border-white/15 px-2 py-0.5">
               <span className="size-1.5 rounded-full bg-emerald-400" />
               All presenters on air
