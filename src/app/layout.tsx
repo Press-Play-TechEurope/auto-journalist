@@ -1,7 +1,7 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist, Space_Grotesk } from "next/font/google";
+import { Geist, Instrument_Serif, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
 import { Toaster } from "~/components/ui/sonner";
@@ -24,13 +24,20 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
 });
 
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${geist.variable} ${spaceGrotesk.variable}`}
+      className={`${geist.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable}`}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground min-h-screen font-sans antialiased">

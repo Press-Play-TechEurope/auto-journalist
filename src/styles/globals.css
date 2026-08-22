@@ -5,10 +5,14 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-display: var(--font-space-grotesk), var(--font-geist-sans),
-    ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-space-grotesk), var(--font-geist-sans), ui-sans-serif, system-ui,
+    sans-serif;
+  --font-serif:
+    var(--font-instrument-serif), ui-serif, Georgia, "Times New Roman", serif;
 }
 
 @theme inline {
