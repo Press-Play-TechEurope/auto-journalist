@@ -4,6 +4,12 @@
 
 AI Newsroom — aggregate RSS news, enrich articles with AI, and turn them into talking-head videos ready for social media.
 
+APIs used: 
+- Tavily Extract (for extracting article content and images)
+- OpenAI (for generating scripts and captions)
+- fal.ai (for TTS and Video Generation)
+- VEED (model: Fabric 1.0)
+
 ## What it does
 
 auto-journalist is a single-tenant web app (one shared password) that watches multiple news sources, helps you pick a story, and produces a short presenter-style video from it:
