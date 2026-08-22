@@ -26,6 +26,8 @@ model OrgConfig {
   ttsModel           String     @default("fal-ai/elevenlabs/tts/multilingual-v2")
   /// veed/subtitles preset (basic = 1x rate, dynamic = 2x rate).
   subtitlePreset     String     @default("casper")
+  /// veed/subtitles source language (BCP-47), e.g. "en-GB".
+  subtitleLanguage   String     @default("en-GB")
   updatedAt          DateTime   @updatedAt
 }
 

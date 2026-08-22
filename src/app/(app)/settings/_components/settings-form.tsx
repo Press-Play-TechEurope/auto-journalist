@@ -5,6 +5,16 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { PresenterPicker } from "~/components/presenter-picker";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from "~/components/ui/combobox";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -25,12 +35,20 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { VoicePicker } from "~/components/voice-picker";
-import { isTtsModel, TTS_MODELS, type TtsModel } from "~/server/tts-models";
 import {
+  DEFAULT_SUBTITLE_LANGUAGE,
+  isSubtitleLanguage,
+  SUBTITLE_LANGUAGES,
+  type SubtitleLanguage,
+  type SubtitleLanguageEntry,
+} from "~/server/subtitle-languages";
+import {
+  DEFAULT_SUBTITLE_PRESET,
   isSubtitlePreset,
   SUBTITLE_PRESETS,
   type SubtitlePreset,
 } from "~/server/subtitle-presets";
+import { isTtsModel, TTS_MODELS, type TtsModel } from "~/server/tts-models";
 import { PROVIDER_LABEL, providerForModel } from "~/server/voices";
 import { api } from "~/trpc/react";
 
@@ -47,7 +65,10 @@ export function SettingsForm() {
   const [defaultVoiceId, setDefaultVoiceId] = useState<string | undefined>();
   const [ttsModel, setTtsModel] = useState<TtsModel>(TTS_MODELS[0].value);
   const [subtitlePreset, setSubtitlePreset] = useState<SubtitlePreset>(
-    SUBTITLE_PRESETS[0].value,
+    DEFAULT_SUBTITLE_PRESET,
+  );
+  const [subtitleLanguage, setSubtitleLanguage] = useState<SubtitleLanguage>(
+    DEFAULT_SUBTITLE_LANGUAGE,
   );
   const provider = providerForModel(ttsModel);
 
@@ -66,7 +87,12 @@ export function SettingsForm() {
     setSubtitlePreset(
       isSubtitlePreset(config.data.subtitlePreset)
         ? config.data.subtitlePreset
-        : SUBTITLE_PRESETS[0].value,
+        : DEFAULT_SUBTITLE_PRESET,
+    );
+    setSubtitleLanguage(
+      isSubtitleLanguage(config.data.subtitleLanguage)
+        ? config.data.subtitleLanguage
+        : DEFAULT_SUBTITLE_LANGUAGE,
     );
   }, [config.data]);
 
@@ -94,6 +120,7 @@ export function SettingsForm() {
           defaultVoiceId: defaultVoiceId!,
           ttsModel,
           subtitlePreset,
+          subtitleLanguage,
         });
       }}
     >
@@ -210,40 +237,87 @@ export function SettingsForm() {
           <CardHeader>
             <CardTitle>Subtitles</CardTitle>
             <CardDescription>
-              Style used by veed/subtitles when it auto-transcribes and burns
-              captions into the final video.
+              Style and language for veed/subtitles when it auto-transcribes
+              and burns captions into the final video.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Label>Subtitle preset</Label>
-            <Select
-              items={SUBTITLE_PRESETS}
-              value={subtitlePreset}
-              onValueChange={(v) => {
-                const next = String(v);
-                if (isSubtitlePreset(next)) setSubtitlePreset(next);
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SUBTITLE_PRESETS.map((p) => (
-                  <SelectItem key={p.value} value={p.value}>
-                    {p.label}{" "}
-                    {p.tier === "dynamic" ? (
-                      <span className="text-muted-foreground ml-1 text-xs">
-                        (2× rate)
-                      </span>
-                    ) : null}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-muted-foreground text-xs">
-              Basic presets cost 1×, dynamic presets cost 2× — both auto-
-              transcribe the audio and burn captions into the MP4.
-            </p>
+          <CardContent className="grid gap-6 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label>Subtitle preset</Label>
+              <Select
+                items={SUBTITLE_PRESETS}
+                value={subtitlePreset}
+                onValueChange={(v) => {
+                  const next = String(v);
+                  if (isSubtitlePreset(next)) setSubtitlePreset(next);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUBTITLE_PRESETS.map((p) => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}{" "}
+                      {p.tier === "dynamic" ? (
+                        <span className="text-muted-foreground ml-1 text-xs">
+                          (2× rate)
+                        </span>
+                      ) : null}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                Basic presets cost 1×, dynamic presets cost 2× — both auto-
+                transcribe the audio and burn captions into the MP4.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Source language</Label>
+              <Combobox<SubtitleLanguageEntry>
+                items={SUBTITLE_LANGUAGES}
+                value={
+                  SUBTITLE_LANGUAGES.find((l) => l.value === subtitleLanguage) ??
+                  null
+                }
+                onValueChange={(v: SubtitleLanguageEntry | null) => {
+                  if (!v) return;
+                  if (isSubtitleLanguage(v.value)) setSubtitleLanguage(v.value);
+                }}
+                itemToStringLabel={(l: SubtitleLanguageEntry) => l.label}
+                isItemEqualToValue={(a, b) => a.value === b.value}
+              >
+                <ComboboxTrigger className="w-full" aria-label="Source language">
+                  <ComboboxValue placeholder="Select language…">
+                    {(l: SubtitleLanguageEntry | null) => (
+                      <span>{l?.label}</span>
+                    )}
+                  </ComboboxValue>
+                </ComboboxTrigger>
+                <ComboboxContent>
+                  <ComboboxInput
+                    placeholder="Search languages…"
+                    autoFocus
+                  />
+                  <ComboboxEmpty>No language matches.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(l: SubtitleLanguageEntry) => (
+                      <ComboboxItem key={l.value} value={l}>
+                        <span className="flex-1 truncate">{l.label}</span>
+                        <span className="text-muted-foreground text-xs tabular-nums">
+                          {l.value}
+                        </span>
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+              <p className="text-muted-foreground text-xs">
+                Should match the source audio (not the desired output language) —
+                improves transcription accuracy.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
