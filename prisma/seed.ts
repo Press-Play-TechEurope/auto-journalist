@@ -44,11 +44,31 @@ const PRESENTERS = [
 ];
 
 const SOURCES = [
-  { name: "BBC News — World", feedUrl: "https://feeds.bbci.co.uk/news/world/rss.xml", siteUrl: "https://www.bbc.com/news" },
-  { name: "The Verge", feedUrl: "https://www.theverge.com/rss/index.xml", siteUrl: "https://www.theverge.com" },
-  { name: "TechCrunch", feedUrl: "https://techcrunch.com/feed/", siteUrl: "https://techcrunch.com" },
-  { name: "The Guardian — World", feedUrl: "https://www.theguardian.com/world/rss", siteUrl: "https://www.theguardian.com/world" },
-  { name: "Ars Technica", feedUrl: "https://feeds.arstechnica.com/arstechnica/index", siteUrl: "https://arstechnica.com" },
+  {
+    name: "BBC News — World",
+    feedUrl: "https://feeds.bbci.co.uk/news/world/rss.xml",
+    siteUrl: "https://www.bbc.com/news",
+  },
+  {
+    name: "The Verge",
+    feedUrl: "https://www.theverge.com/rss/index.xml",
+    siteUrl: "https://www.theverge.com",
+  },
+  {
+    name: "TechCrunch",
+    feedUrl: "https://techcrunch.com/feed/",
+    siteUrl: "https://techcrunch.com",
+  },
+  {
+    name: "The Guardian — World",
+    feedUrl: "https://www.theguardian.com/world/rss",
+    siteUrl: "https://www.theguardian.com/world",
+  },
+  {
+    name: "Ars Technica",
+    feedUrl: "https://feeds.arstechnica.com/arstechnica/index",
+    siteUrl: "https://arstechnica.com",
+  },
 ];
 
 async function main() {
@@ -59,8 +79,21 @@ async function main() {
     presenters.push(
       await db.presenter.upsert({
         where: { id },
-        create: { id, name: p.name, bio: p.bio, imageUrl: p.imageUrl, voiceId: p.voiceId, sortOrder: i },
-        update: { name: p.name, bio: p.bio, imageUrl: p.imageUrl, voiceId: p.voiceId, sortOrder: i },
+        create: {
+          id,
+          name: p.name,
+          bio: p.bio,
+          imageUrl: p.imageUrl,
+          voiceId: p.voiceId,
+          sortOrder: i,
+        },
+        update: {
+          name: p.name,
+          bio: p.bio,
+          imageUrl: p.imageUrl,
+          voiceId: p.voiceId,
+          sortOrder: i,
+        },
       }),
     );
   }
@@ -79,7 +112,9 @@ async function main() {
     update: {},
   });
 
-  console.log(`Seeded ${presenters.length} presenters, ${SOURCES.length} sources, org config.`);
+  console.log(
+    `Seeded ${presenters.length} presenters, ${SOURCES.length} sources, org config.`,
+  );
 }
 
 main()
