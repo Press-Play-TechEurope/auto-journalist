@@ -25,8 +25,6 @@ import {
 } from "./_components/landing/mocks";
 
 const NAV = [
-  { href: "/feed", label: "Feed" },
-  { href: "/library", label: "Library" },
   { href: "#how-it-works", label: "How it works" },
   { href: "#presenters", label: "Presenters" },
 ];
@@ -123,18 +121,12 @@ export default function LandingPage() {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center">
             <Link
               href="/login"
-              className="hidden h-8 items-center px-3 text-[13px] text-white/80 transition-colors hover:text-white sm:inline-flex"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/feed"
               className="inline-flex h-8 items-center rounded-full bg-white px-3.5 text-[13px] font-medium text-slate-900 transition-colors hover:bg-slate-100"
             >
-              Watch the feed
+              Log in
             </Link>
           </div>
         </header>
