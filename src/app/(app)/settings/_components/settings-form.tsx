@@ -126,7 +126,7 @@ export function SettingsForm() {
     >
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
+          <h1 className="font-serif text-3xl tracking-tight">
             Settings
           </h1>
           <p className="text-muted-foreground text-sm">

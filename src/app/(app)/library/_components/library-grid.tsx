@@ -22,9 +22,7 @@ export function LibraryGrid() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
-            Media library
-          </h1>
+          <h1 className="font-serif text-3xl tracking-tight">Media library</h1>
           <p className="text-muted-foreground text-sm">
             {items.length} video{items.length === 1 ? "" : "s"}
             {active.length > 0 && ` · ${active.length} generating`}
@@ -92,10 +90,10 @@ function LibraryCard({ item }: { item: Item }) {
   return (
     <Link
       href={`/library/${item.id}`}
-      className="group bg-card border-border/60 flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+      className="group bg-card border-border/60 flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="bg-muted relative aspect-[3/4] overflow-hidden">
-        {item.subtitledVideoUrl ?? item.videoUrl ? (
+        {(item.subtitledVideoUrl ?? item.videoUrl) ? (
           <video
             src={item.subtitledVideoUrl ?? item.videoUrl ?? undefined}
             className="size-full object-cover"
@@ -123,7 +121,7 @@ function LibraryCard({ item }: { item: Item }) {
         </div>
         {(item.subtitledVideoUrl ?? item.videoUrl) && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-            <span className="bg-primary/80 flex size-11 items-center justify-center rounded-full text-white shadow-lg backdrop-blur-sm">
+            <span className="flex size-11 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-lg backdrop-blur-sm">
               <Play className="ml-0.5 size-5" />
             </span>
           </div>

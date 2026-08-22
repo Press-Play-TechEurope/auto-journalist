@@ -11,7 +11,12 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 const LINKS = [
-  { href: "/feed", label: "Feed", icon: Rss, match: (p: string) => p === "/feed" },
+  {
+    href: "/feed",
+    label: "Feed",
+    icon: Rss,
+    match: (p: string) => p === "/feed",
+  },
   {
     href: "/library",
     label: "Library",
@@ -33,10 +38,10 @@ export function Nav() {
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-4 sm:px-6">
         <Link
           href="/feed"
-          className="font-display flex items-center gap-2 font-semibold tracking-tight"
+          className="flex items-center gap-2 text-[15px] font-semibold tracking-tight"
         >
-          <span className="from-primary flex size-7 items-center justify-center rounded-lg bg-gradient-to-br to-fuchsia-500 text-white shadow-sm">
-            <Logo className="size-4" />
+          <span className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+            <Logo className="size-3.5" />
           </span>
           Press Play
         </Link>

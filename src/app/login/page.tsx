@@ -18,12 +18,10 @@ export default async function LoginPage({
       />
       <div className="w-full max-w-sm space-y-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="from-primary flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br to-fuchsia-500 text-white shadow-lg">
+          <div className="bg-ink text-ink-foreground flex size-12 items-center justify-center rounded-xl shadow-lg">
             <Logo className="size-6" />
           </div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
-            Press Play
-          </h1>
+          <h1 className="font-serif text-3xl tracking-tight">Press Play</h1>
           <p className="text-muted-foreground text-sm">
             Enter the newsroom password to continue.
           </p>

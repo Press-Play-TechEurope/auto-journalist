@@ -375,7 +375,7 @@ export function MediaDetail({ id }: { id: string }) {
                 {hostname(item.article.url)} <ExternalLink className="size-3" />
               </a>
             </div>
-            <h1 className="font-display mt-1 text-2xl leading-snug font-semibold tracking-tight">
+            <h1 className="font-serif mt-1 text-3xl leading-tight tracking-tight">
               {item.article.title}
             </h1>
           </div>

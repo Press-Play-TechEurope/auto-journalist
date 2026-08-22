@@ -149,6 +149,7 @@ export function ArticleDialog({
                 Cancel
               </Button>
               <Button
+                variant="cta"
                 onClick={() =>
                   start.mutate({ articleId: article.id, presenterId, voiceId })
                 }
