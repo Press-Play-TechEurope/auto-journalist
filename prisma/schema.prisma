@@ -82,11 +82,14 @@ model Article {
   /// Structured result from Tavily Extract.
   extract     Json?
   enrichedAt  DateTime?
+  /// Set when the user stars the article; the "Starred" view spans all folders.
+  starredAt   DateTime?
   createdAt   DateTime    @default(now())
   mediaItems  MediaItem[]
 
   @@unique([sourceId, guid])
   @@index([publishedAt(sort: Desc)])
+  @@index([starredAt])
 }
 
 enum MediaStatus {

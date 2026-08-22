@@ -9,7 +9,10 @@ export const articleRouter = createTRPCRouter({
       z
         .object({
           sourceId: z.string().optional(),
-          /** Filter to sources in this folder. "unfiled" = sources with no folder. */
+          /**
+           * Filter to sources in this folder. "unfiled" = sources with no
+           * folder; "starred" = starred articles across every folder.
+           */
           folderId: z.string().optional(),
           q: z.string().trim().optional(),
           cursor: z.string().optional(),
@@ -21,14 +24,16 @@ export const articleRouter = createTRPCRouter({
       const items = await ctx.db.article.findMany({
         where: {
           sourceId: input.sourceId,
-          ...(input.folderId
-            ? {
-                source: {
-                  folderId:
-                    input.folderId === "unfiled" ? null : input.folderId,
-                },
-              }
-            : {}),
+          ...(input.folderId === "starred"
+            ? { starredAt: { not: null } }
+            : input.folderId
+              ? {
+                  source: {
+                    folderId:
+                      input.folderId === "unfiled" ? null : input.folderId,
+                  },
+                }
+              : {}),
           ...(input.q
             ? { title: { contains: input.q, mode: "insensitive" } }
             : {}),
@@ -68,4 +73,20 @@ export const articleRouter = createTRPCRouter({
   enrich: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(({ input }) => enrichArticle(input.id)),
+
+  /** Number of starred articles — drives the "Starred" tab in the feed. */
+  starredCount: publicProcedure.query(({ ctx }) =>
+    ctx.db.article.count({ where: { starredAt: { not: null } } }),
+  ),
+
+  /** Star or unstar an article. Starring never triggers media generation. */
+  setStarred: publicProcedure
+    .input(z.object({ id: z.string(), starred: z.boolean() }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.article.update({
+        where: { id: input.id },
+        data: { starredAt: input.starred ? new Date() : null },
+        select: { id: true, starredAt: true },
+      }),
+    ),
 });

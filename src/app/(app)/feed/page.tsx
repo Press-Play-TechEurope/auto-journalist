@@ -10,6 +10,7 @@ export default async function FeedPage() {
   void api.article.feed.prefetch({});
   void api.source.list.prefetch();
   void api.folder.list.prefetch();
+  void api.article.starredCount.prefetch();
   void api.presenter.list.prefetch();
   void api.config.get.prefetch();
   return (

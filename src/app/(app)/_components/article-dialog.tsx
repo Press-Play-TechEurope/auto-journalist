@@ -1,6 +1,6 @@
 "use client";
 
-import { Clapperboard, ExternalLink, Loader2 } from "lucide-react";
+import { Clapperboard, ExternalLink, Loader2, Star } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { hostname, timeAgo } from "~/lib/format";
+import { cn } from "~/lib/utils";
 import { providerForModel } from "~/server/voices";
 import { api, type RouterOutputs } from "~/trpc/react";
 
@@ -27,9 +28,12 @@ type FeedArticle = RouterOutputs["article"]["feed"]["items"][number];
 export function ArticleDialog({
   article,
   onClose,
+  onToggleStar,
 }: {
   article: FeedArticle | null;
   onClose: () => void;
+  /** Star/unstar without generating anything. */
+  onToggleStar?: () => void;
 }) {
   const router = useRouter();
   const config = api.config.get.useQuery();
@@ -52,6 +56,7 @@ export function ArticleDialog({
   });
 
   const existing = article?.mediaItems[0];
+  const starred = Boolean(article?.starredAt);
 
   return (
     <Dialog open={!!article} onOpenChange={(open) => !open && onClose()}>
@@ -116,14 +121,30 @@ export function ArticleDialog({
             </div>
 
             <DialogFooter className="items-center">
-              {existing && (
-                <Link
-                  href={`/library/${existing.id}`}
-                  className="text-muted-foreground mr-auto inline-flex items-center gap-2 text-sm hover:underline"
-                >
-                  <StatusBadge status={existing.status} /> Open existing video
-                </Link>
-              )}
+              <div className="mr-auto flex flex-wrap items-center gap-3">
+                {onToggleStar && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onToggleStar}
+                    aria-pressed={starred}
+                  >
+                    <Star
+                      data-icon="inline-start"
+                      className={cn(starred && "fill-amber-400 text-amber-400")}
+                    />
+                    {starred ? "Starred" : "Star"}
+                  </Button>
+                )}
+                {existing && (
+                  <Link
+                    href={`/library/${existing.id}`}
+                    className="text-muted-foreground inline-flex items-center gap-2 text-sm hover:underline"
+                  >
+                    <StatusBadge status={existing.status} /> Open existing video
+                  </Link>
+                )}
+              </div>
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
