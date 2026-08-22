@@ -39,12 +39,6 @@ const PRESENTERS = [
     name: "Sofia Reyes",
     imageUrl: "/presenters/gpt3.png",
   },
-  {
-    key: "james",
-    name: "James Whitfield",
-    imageUrl:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1024&q=80&fit=crop",
-  },
 ];
 
 const FOLDERS = ["World", "Tech"] as const;
