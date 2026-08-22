@@ -170,6 +170,17 @@ export function MediaDetail({ id }: { id: string }) {
     (voiceId != null && voiceId !== item.voiceId);
   const busy = !isTerminal(item.status);
   const publishedOn = new Set(item.publications.map((p) => p.platform));
+  // Latest publication per platform, for a compact "posted" summary.
+  const latestPubs = [
+    ...item.publications
+      .reduce((m, p) => {
+        const cur = m.get(p.platform);
+        if (!cur || new Date(p.postedAt) > new Date(cur.postedAt))
+          m.set(p.platform, p);
+        return m;
+      }, new Map<Platform, Publication>())
+      .values(),
+  ];
 
   return (
     <div className="space-y-5">
@@ -270,23 +281,26 @@ export function MediaDetail({ id }: { id: string }) {
               Publishing unlocks once the video is ready.
             </p>
           )}
-          {item.publications.length > 0 && (
-            <ul className="space-y-1 text-sm">
-              {item.publications.map((p) => (
-                <li key={p.id} className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>{PLATFORM_META[p.platform].label}</span>
-                  <span className="text-muted-foreground">
-                    · {timeAgo(p.postedAt)}
-                  </span>
+          {latestPubs.length > 0 && (
+            <p className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              {latestPubs.map((p) => (
+                <span key={p.id} className="inline-flex items-center gap-1">
+                  <CheckCircle2 className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                  {PLATFORM_META[p.platform].label} · {timeAgo(p.postedAt)}
                   {p.externalUrl && (
-                    <span className="text-muted-foreground ml-auto truncate text-xs">
-                      {p.externalUrl}
-                    </span>
+                    <a
+                      href={p.externalUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-foreground"
+                      title="View post"
+                    >
+                      <ExternalLink className="size-3" />
+                    </a>
                   )}
-                </li>
+                </span>
               ))}
-            </ul>
+            </p>
           )}
 
           <Stepper status={item.status} />
