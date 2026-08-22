@@ -139,12 +139,12 @@ export default function LandingPage() {
         {/* Hero copy */}
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-14 pb-48 text-center sm:px-6 sm:pt-20 sm:pb-64">
           <h1 className="animate-in fade-in slide-in-from-bottom-3 max-w-3xl font-serif text-[44px] leading-[1.02] tracking-[-0.02em] text-balance delay-100 duration-500 sm:text-7xl">
-            Post about today&rsquo;s news without filming today
+            Post about today&rsquo;s news without filming
           </h1>
           <p className="animate-in fade-in slide-in-from-bottom-4 mt-6 max-w-lg text-[15px] leading-relaxed text-balance text-white/75 delay-200 duration-500 sm:text-base">
-            Press Play pulls the stories from your feeds, writes the script and
-            the caption, and renders a subtitled talking-head video — with your
-            face or one of ours. You just hit post.
+            Press Play pulls stories from your feeds, writes the script, and
+            creates a subtitled piece-to-camera. Either with your face, or one
+            of ours. You just hit generate.
           </p>
           <div className="animate-in fade-in slide-in-from-bottom-5 mt-8 delay-300 duration-500">
             <PillLink href="/feed" tone="lime">
@@ -164,8 +164,8 @@ export default function LandingPage() {
         </h2>
         <p className="mt-3 max-w-md text-[15px] text-slate-500">
           Press Play keeps your channel{" "}
-          <span className="text-slate-900">current</span> without the research
-          rabbit hole, the script writing or the reshoots.
+          <span className="text-slate-900">up to date</span> without the
+          research rabbit hole, scriptwriting, or reshoots.
         </p>
 
         <div className="relative mt-12">
@@ -181,9 +181,9 @@ export default function LandingPage() {
             <Newspaper className="size-3.5" />
           </span>
           <p className="max-w-md text-[15px] text-slate-600">
-            <span className="text-slate-900">Never run dry.</span> Every feed
+            <span className="text-slate-900">Never run out.</span> Every feed
             you follow becomes a queue of stories worth a video, sorted by what
-            just dropped.
+            just came out.
           </p>
           <PillLink href="/feed" tone="light" className="sm:ml-auto">
             See the feed
@@ -203,9 +203,8 @@ export default function LandingPage() {
               We read the feeds so you can post
             </h3>
             <p className="mt-2 max-w-sm text-[14px] text-slate-500">
-              Add the sources your audience cares about. We pull the articles,
-              the images and the context, then line up the ones worth your next
-              post.
+              Add the sources your audience cares about. We pull the context,
+              then line up the ones worth your next post.
             </p>
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white">
               <ReadMock />
@@ -222,8 +221,9 @@ export default function LandingPage() {
               The script and the caption, already written
             </h3>
             <p className="mt-2 max-w-sm text-[14px] text-slate-500">
-              Dense press release in, 45-second script and social caption out —
-              in your tone, at your length. Edit a line, regenerate, done.
+              A dense press release or the latest article in a configurable
+              script, with captions out. In your tone, at your length. Edit a
+              line, regenerate, and post.
             </p>
             <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-b from-slate-50 to-white">
               <WriteMock />
@@ -243,7 +243,7 @@ export default function LandingPage() {
           <p className="max-w-xl text-[17px] text-balance sm:text-xl">
             A 60-second explainer takes about{" "}
             <span className="font-serif text-2xl sm:text-3xl">3 hours</span> to
-            research, write, film, cut and caption. The news moves faster than
+            research, write, film, edit and caption. The news moves faster than
             that.
           </p>
           <PillLink href="/feed" tone="lime" className="mt-8 h-8 text-[12px]">
@@ -267,7 +267,7 @@ export default function LandingPage() {
             <AskMock />
             <div className="max-w-sm lg:justify-self-end">
               <p className="text-[15px] leading-relaxed text-slate-500">
-                Dense press releases, earnings calls and policy PDFs become{" "}
+                Any news articles become{" "}
                 <span className="text-slate-900">
                   scripts your audience will actually finish
                 </span>
@@ -303,8 +303,8 @@ export default function LandingPage() {
           </h2>
           <p className="mt-3 max-w-sm text-[15px] text-slate-500">
             Use your own photo and voice, or one of our AI presenters. Swap the
-            presenter mid-draft, swap the voice per video — no camera, no ring
-            light, no reshoots.
+            presenter mid-draft, swap the voice per video. No camera, no ring
+            light, no reshoots
           </p>
           <PillLink href="/feed" tone="dark" className="mt-7">
             Pick a presenter
