@@ -33,7 +33,7 @@ export function LibraryGrid() {
         <Button
           className="ml-auto"
           variant="outline"
-          render={<Link href="/" />}
+          render={<Link href="/feed" />}
           nativeButton={false}
         >
           <Clapperboard data-icon="inline-start" /> Pick a story
@@ -61,7 +61,7 @@ export function LibraryGrid() {
           </p>
           <Button
             variant="outline"
-            render={<Link href="/" />}
+            render={<Link href="/feed" />}
             nativeButton={false}
           >
             Go to feed

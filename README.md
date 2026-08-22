@@ -1,10 +1,14 @@
-# auto-journalist
+# Press Play (auto-journalist)
 
 > https://auto-journalist.vercel.app/
 
-AI Newsroom — aggregate RSS news, enrich articles with AI, and turn them into talking-head videos ready for social media.
+The news wasn't built for your brain. We fixed that.
 
-APIs used: 
+Press Play is an AI newsroom that turns news articles and tech announcements into short talking-head videos — the kind you'd actually finish watching. No 10-minute reads, no jargon, no 40-tab browser sessions. Just press play.
+
+Made for the masses and the young. Articles in, vibes out.
+
+APIs used:
 - Tavily Extract (for extracting article content and images)
 - OpenAI (for generating scripts and captions)
 - fal.ai (for TTS and Video Generation)
@@ -12,13 +16,13 @@ APIs used:
 
 ## What it does
 
-auto-journalist is a single-tenant web app (one shared password) that watches multiple news sources, helps you pick a story, and produces a short presenter-style video from it:
+Press Play is a single-tenant web app (one shared password — it's a newsroom, not a nightclub) that watches the news so you don't have to, then explains it back to you on camera:
 
 1. **Aggregate** — add any number of RSS feeds as sources, optionally grouped into folders (e.g. World, Tech). The app polls them on demand (Refresh button, and automatically on page load when stale) and shows a unified feed sorted by date, filterable by folder and source.
 2. **Enrich** — pick a story and a presenter, click **Generate video**:
    - The article is downloaded with a plain HTTP fetch and reduced to text.
    - [Tavily Extract](https://docs.tavily.com/#extract-webpages) pulls structured content + images from the URL (best-effort; falls back to the raw fetch).
-3. **Script** — the article content plus your org settings (brand name, tone, target length) go to OpenAI, which returns a spoken script **and** a social caption (structured output).
+3. **Script** — the article content plus your org settings (brand name, tone, target length) go to OpenAI, which returns a spoken script **and** a social caption (structured output). Dense press release in, snappy script out.
 4. **Voice** — the script goes through TTS on fal.ai (MiniMax Speech-02 by default; presenter-specific preset voice).
 5. **Video** — audio + presenter image go to [Veed Fabric 1.0 via fal.ai](https://fal.ai/models/veed/fabric-1.0/api), which renders the talking-head MP4.
 6. **Library & publish** — every generated item lands in the media library with its script and caption. Edit the script and **regenerate** the video, then **post to X / Instagram** (mocked for the demo — shows a success dialog with the post preview).
@@ -46,6 +50,14 @@ RSS feeds ──► unified feed (sorted by date)
 
 The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → GENERATING_AUDIO → GENERATING_VIDEO → READY | FAILED`). Each tRPC `media.advance` call runs **one bounded step** so it fits inside a serverless invocation; the browser keeps calling it until the item is terminal. Video rendering is submitted to the fal queue and polled. Generated audio/video stay on fal's CDN (`expiresIn: "never"`), so no separate object storage is needed.
 
+## Pages
+
+- `/` — the flashy landing page. Public, no login required. Explains what Press Play does before you commit to anything.
+- `/login` — the password gate. One shared password, one signed cookie.
+- `/feed` — the unified news feed. Pick a story, pick a presenter, generate a video.
+- `/library` — every video you've generated, with scripts, captions, and regenerate.
+- `/settings` — sources, folders, presenters, and org config (brand name, tone, length).
+
 ## Integrations
 
 | Service | Purpose | Notes |
@@ -63,9 +75,10 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 
 ```
 src/
+  app/page.tsx          landing page (public — the vibe check before the login)
   app/(app)/            feed, library, library/[id], settings (RSC pages + client components)
   app/login/            password gate (server action + signed cookie)
-  middleware.ts         redirects to /login unless the session cookie verifies
+  middleware.ts         redirects to /login unless the session cookie verifies (/ is public)
   server/pipeline.ts    generation state machine
   server/lib/           rss, article-fetch, tavily, openai, fal, publish
   server/api/routers/   source, folder, article, media, presenter, config, publish
@@ -84,7 +97,7 @@ pnpm db:seed                  # presenters, feeds, org config
 pnpm dev
 ```
 
-Then open http://localhost:3000 and sign in with `APP_PASSWORD`.
+Then open http://localhost:3000 — admire the landing page, then hit **Enter the newsroom** and sign in with `APP_PASSWORD`.
 
 ### Environment variables
 
@@ -107,4 +120,4 @@ The app boots without the third-party keys; a generation will fail at the first 
 
 ## Status
 
-MVP implemented: feed, sources, pipeline, library, regenerate, mocked publishing, settings, password gate. Not yet done: real X/Instagram adapters, presenter upload, multi-user auth.
+MVP implemented: landing page, feed, sources, pipeline, library, regenerate, mocked publishing, settings, password gate. Not yet done: real X/Instagram adapters, presenter upload, multi-user auth.

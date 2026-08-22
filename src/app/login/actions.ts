@@ -19,7 +19,7 @@ export async function login(
   const pw = formData.get("password");
   const password = typeof pw === "string" ? pw : "";
   const nx = formData.get("next");
-  const next = typeof nx === "string" ? nx : "/";
+  const next = typeof nx === "string" ? nx : "/feed";
 
   if (password !== env.APP_PASSWORD) {
     return { error: "Incorrect password." };

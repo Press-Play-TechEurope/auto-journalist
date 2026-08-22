@@ -22,13 +22,13 @@ export default async function LoginPage({
             <Logo className="size-6" />
           </div>
           <h1 className="font-display text-2xl font-semibold tracking-tight">
-            auto-journalist
+            Press Play
           </h1>
           <p className="text-muted-foreground text-sm">
             Enter the newsroom password to continue.
           </p>
         </div>
-        <LoginForm next={next ?? "/"} />
+        <LoginForm next={next ?? "/feed"} />
       </div>
     </main>
   );

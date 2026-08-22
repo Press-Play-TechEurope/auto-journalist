@@ -8,8 +8,9 @@ import { Toaster } from "~/components/ui/sonner";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: { default: "auto-journalist", template: "%s — auto-journalist" },
-  description: "AI newsroom: RSS → script → talking-head video → social.",
+  title: { default: "Press Play", template: "%s — Press Play" },
+  description:
+    "Press Play turns news articles and tech announcements into short talking-head videos you'll actually watch. News for the masses — articles in, vibes out.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

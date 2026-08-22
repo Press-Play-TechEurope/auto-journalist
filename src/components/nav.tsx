@@ -11,7 +11,7 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 const LINKS = [
-  { href: "/", label: "Feed", icon: Rss, match: (p: string) => p === "/" },
+  { href: "/feed", label: "Feed", icon: Rss, match: (p: string) => p === "/feed" },
   {
     href: "/library",
     label: "Library",
@@ -32,13 +32,13 @@ export function Nav() {
     <header className="bg-background/70 sticky top-0 z-30 border-b backdrop-blur-xl">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-6 px-4 sm:px-6">
         <Link
-          href="/"
+          href="/feed"
           className="font-display flex items-center gap-2 font-semibold tracking-tight"
         >
           <span className="from-primary flex size-7 items-center justify-center rounded-lg bg-gradient-to-br to-fuchsia-500 text-white shadow-sm">
             <Logo className="size-4" />
           </span>
-          auto-journalist
+          Press Play
         </Link>
         <nav className="flex items-center gap-1">
           {LINKS.map(({ href, label, icon: Icon, match }) => (

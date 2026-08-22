@@ -1,8 +1,10 @@
 import { api, HydrateClient } from "~/trpc/server";
 
-import { Feed } from "./_components/feed";
+import { Feed } from "../_components/feed";
 
 export const dynamic = "force-dynamic";
+
+export const metadata = { title: "Feed" };
 
 export default async function FeedPage() {
   void api.article.feed.prefetch({});

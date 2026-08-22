@@ -7,6 +7,10 @@ const PUBLIC_PREFIXES = ["/login", "/api/auth"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  // The landing page is public.
+  if (pathname === "/") {
+    return NextResponse.next();
+  }
   if (PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
