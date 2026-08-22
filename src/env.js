@@ -11,6 +11,19 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+
+    /** Shared password for the single-user gate. */
+    APP_PASSWORD: z.string().min(1),
+    /** Secret used to sign the session cookie (>= 16 chars). */
+    AUTH_SECRET: z.string().min(16),
+    /** Protects the cron endpoint (Vercel sends it as a Bearer token). */
+    CRON_SECRET: z.string().min(1).optional(),
+
+    // Third-party services. Optional so the app boots without them; the
+    // pipeline fails with a clear message if a step needs a missing key.
+    OPENAI_API_KEY: z.string().min(1).optional(),
+    TAVILY_API_KEY: z.string().min(1).optional(),
+    FAL_KEY: z.string().min(1).optional(),
   },
 
   /**
@@ -29,7 +42,12 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    APP_PASSWORD: process.env.APP_PASSWORD,
+    AUTH_SECRET: process.env.AUTH_SECRET,
+    CRON_SECRET: process.env.CRON_SECRET,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    TAVILY_API_KEY: process.env.TAVILY_API_KEY,
+    FAL_KEY: process.env.FAL_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

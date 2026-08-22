@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema for auto-journalist
+// learn more: https://pris.ly/d/prisma-schema
 
 generator client {
     provider = "prisma-client-js"
@@ -11,11 +11,112 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+/// Singleton (id = "default") holding org-wide generation settings.
+model OrgConfig {
+    id                 String     @id @default("default")
+    brandName          String     @default("Auto Journalist")
+    /// Free-text instructions for tone/style passed to the script prompt.
+    tone               String     @default("Clear, confident, conversational newsroom anchor. Neutral and factual; no sensationalism.")
+    targetSeconds      Int        @default(45)
+    defaultPresenterId String?
+    defaultPresenter   Presenter? @relation(fields: [defaultPresenterId], references: [id], onDelete: SetNull)
+    /// fal.ai TTS endpoint id, e.g. fal-ai/minimax/speech-02-hd
+    ttsModel           String     @default("fal-ai/minimax/speech-02-hd")
+    updatedAt          DateTime   @updatedAt
+}
 
-    @@index([name])
+/// A talking-head presenter: reference image + default voice.
+model Presenter {
+    id         String      @id @default(cuid())
+    name       String
+    bio        String?
+    imageUrl   String
+    voiceId    String
+    sortOrder  Int         @default(0)
+    configs    OrgConfig[]
+    mediaItems MediaItem[]
+}
+
+/// An RSS feed we poll.
+model Source {
+    id           String    @id @default(cuid())
+    name         String
+    feedUrl      String    @unique
+    siteUrl      String?
+    lastPolledAt DateTime?
+    lastError    String?
+    createdAt    DateTime  @default(now())
+    articles     Article[]
+}
+
+/// A single item from a feed, enriched on demand.
+model Article {
+    id          String      @id @default(cuid())
+    sourceId    String
+    source      Source      @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+    guid        String
+    title       String
+    url         String
+    publishedAt DateTime
+    summary     String?
+    imageUrl    String?
+    /// Plain-text body from the simple HTTP fetch.
+    rawContent  String?
+    /// Structured result from Tavily Extract.
+    extract     Json?
+    enrichedAt  DateTime?
+    createdAt   DateTime    @default(now())
+    mediaItems  MediaItem[]
+
+    @@unique([sourceId, guid])
+    @@index([publishedAt(sort: Desc)])
+}
+
+enum MediaStatus {
+    QUEUED
+    ENRICHING
+    SCRIPTING
+    GENERATING_AUDIO
+    GENERATING_VIDEO
+    READY
+    FAILED
+}
+
+/// One generated talking-head video (plus its script and social copy).
+model MediaItem {
+    id           String        @id @default(cuid())
+    articleId    String
+    article      Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+    presenterId  String
+    presenter    Presenter     @relation(fields: [presenterId], references: [id])
+    status       MediaStatus   @default(QUEUED)
+    script       String?
+    caption      String?
+    voiceId      String
+    audioUrl     String?
+    videoUrl     String?
+    falRequestId String?
+    error        String?
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    publications Publication[]
+
+    @@index([createdAt(sort: Desc)])
+}
+
+enum Platform {
+    X
+    INSTAGRAM
+}
+
+/// A (mocked) social post of a media item.
+model Publication {
+    id          String    @id @default(cuid())
+    mediaItemId String
+    mediaItem   MediaItem @relation(fields: [mediaItemId], references: [id], onDelete: Cascade)
+    platform    Platform
+    externalUrl String?
+    postedAt    DateTime  @default(now())
+
+    @@unique([mediaItemId, platform])
 }
