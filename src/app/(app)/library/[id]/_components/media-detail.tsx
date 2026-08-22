@@ -540,7 +540,7 @@ function Stepper({ status }: { status: Item["status"] }) {
         const done = status === "READY" || (current > i && current !== -1);
         const active = current === i && status !== "READY";
         return (
-          <li key={step} className="flex flex-1 flex-col gap-1">
+          <li key={step} className="flex min-w-0 flex-1 flex-col gap-1">
             <div
               className={cn(
                 "h-1.5 rounded-full",
@@ -552,6 +552,7 @@ function Stepper({ status }: { status: Item["status"] }) {
               )}
             />
             <span
+              title={STATUS_LABEL[step]}
               className={cn(
                 "truncate text-[10px]",
                 active ? "text-foreground" : "text-muted-foreground",
