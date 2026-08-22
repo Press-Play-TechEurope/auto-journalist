@@ -1,5 +1,8 @@
 # Press Play (auto-journalist)
 
+
+DEMO PASSWORD: techeurope123
+
 > https://auto-journalist.vercel.app/
 
 Post about today's news without filming today.
