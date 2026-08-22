@@ -55,7 +55,7 @@ export function ArticleDialog({
 
   return (
     <Dialog open={!!article} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col sm:max-w-2xl">
         {article && (
           <>
             <DialogHeader>
@@ -85,30 +85,35 @@ export function ArticleDialog({
               )}
             </DialogHeader>
 
-            {article.imageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={article.imageUrl}
-                alt=""
-                className="max-h-64 w-full rounded-xl border object-cover"
-              />
-            )}
+            <div className="-mx-4 min-h-0 flex-1 space-y-4 overflow-y-auto px-4">
+              {article.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={article.imageUrl}
+                  alt=""
+                  className="max-h-64 w-full rounded-xl border object-cover"
+                />
+              )}
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Presenter</p>
-              <PresenterPicker value={presenterId} onChange={setPresenterId} />
-            </div>
-
-            {config.data && (
               <div className="space-y-2">
-                <p className="text-sm font-medium">Voice</p>
-                <VoicePicker
-                  value={voiceId}
-                  onChange={setVoiceId}
-                  provider={providerForModel(config.data.ttsModel)}
+                <p className="text-sm font-medium">Presenter</p>
+                <PresenterPicker
+                  value={presenterId}
+                  onChange={setPresenterId}
                 />
               </div>
-            )}
+
+              {config.data && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Voice</p>
+                  <VoicePicker
+                    value={voiceId}
+                    onChange={setVoiceId}
+                    provider={providerForModel(config.data.ttsModel)}
+                  />
+                </div>
+              )}
+            </div>
 
             <DialogFooter className="items-center">
               {existing && (
