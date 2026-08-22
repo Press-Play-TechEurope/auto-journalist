@@ -32,5 +32,5 @@ export async function login(
 
 export async function logout() {
   (await cookies()).delete(SESSION_COOKIE);
-  redirect("/login");
+  redirect("/");
 }
