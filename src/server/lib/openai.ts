@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { env } from "~/env";
 
-export const OPENAI_MODEL = "gpt-4.1-mini";
+export const OPENAI_MODEL = "gpt-5.6-terra";
 
 const ScriptOutput = z.object({
   headline: z

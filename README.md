@@ -52,7 +52,7 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 |---|---|---|
 | RSS feeds | News ingestion | `rss-parser`; manual refresh + stale-on-load (no cron) |
 | [Tavily Extract](https://docs.tavily.com/#extract-webpages) | Article enrichment | Markdown content + images; optional |
-| OpenAI | Script + caption | `gpt-4.1-mini`, Responses API with zod structured output |
+| OpenAI | Script + caption | `gpt-5.6-terra`, Responses API with zod structured output |
 | [fal.ai TTS](https://fal.ai/explore/text-to-speech-apis) | Text → speech | `fal-ai/minimax/speech-02-hd` by default, preset voices per presenter |
 | [Veed Fabric 1.0 (fal.ai)](https://fal.ai/models/veed/fabric-1.0/api) | Video generation | `image_url` + `audio_url` + `resolution` → MP4 |
 | X / Instagram | Publishing | Mocked behind a `Publisher` interface (`src/server/lib/publish.ts`) |
