@@ -46,7 +46,7 @@ import { VoicePicker } from "~/components/voice-picker";
 import { usePipelineDriver } from "~/hooks/use-pipeline";
 import { hostname, timeAgo, wordCount } from "~/lib/format";
 import { cn } from "~/lib/utils";
-import { isVoiceId, voiceLabel } from "~/server/voices";
+import { providerForModel, resolveVoiceFor, voiceLabel } from "~/server/voices";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { type Platform } from "../../../../../../generated/prisma";
 
@@ -80,17 +80,15 @@ export function MediaDetail({ id }: { id: string }) {
   useEffect(() => {
     if (item?.caption != null) setCaption(item.caption);
   }, [item?.caption]);
-  // Re-record pickers follow the item; a legacy voice id falls back to the
-  // org default so the picker always has a valid selection.
+  // Re-record pickers follow the item; a voice from another provider (e.g. a
+  // legacy id) falls back to the current provider's default.
   useEffect(() => {
     if (item) setPresenterId(item.presenterId);
   }, [item?.presenterId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (!item) return;
-    setVoiceId(
-      isVoiceId(item.voiceId) ? item.voiceId : config.data?.defaultVoiceId,
-    );
-  }, [item?.voiceId, config.data?.defaultVoiceId]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!item || !config.data) return;
+    setVoiceId(resolveVoiceFor(config.data.ttsModel, item.voiceId));
+  }, [item?.voiceId, config.data?.ttsModel]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refetch = () => {
     void utils.media.byId.invalidate({ id });
@@ -322,14 +320,17 @@ export function MediaDetail({ id }: { id: string }) {
                   disabled={busy}
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-muted-foreground text-xs">Voice</Label>
-                <VoicePicker
-                  value={voiceId}
-                  onChange={setVoiceId}
-                  disabled={busy}
-                />
-              </div>
+              {config.data && (
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-xs">Voice</Label>
+                  <VoicePicker
+                    value={voiceId}
+                    onChange={setVoiceId}
+                    provider={providerForModel(config.data.ttsModel)}
+                    disabled={busy}
+                  />
+                </div>
+              )}
               <Button
                 size="sm"
                 onClick={() =>

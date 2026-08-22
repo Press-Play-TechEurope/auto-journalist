@@ -8,7 +8,7 @@ import {
 } from "~/server/lib/fal";
 import { generateScript } from "~/server/lib/openai";
 import { extractArticle } from "~/server/lib/tavily";
-import { isVoiceId } from "~/server/voices";
+import { resolveVoiceFor } from "~/server/voices";
 
 export const TERMINAL: MediaStatus[] = ["READY", "FAILED"];
 
@@ -189,7 +189,10 @@ export async function startGeneration(opts: {
     data: {
       articleId: opts.articleId,
       presenterId,
-      voiceId: opts.voiceId ?? config.defaultVoiceId,
+      voiceId: resolveVoiceFor(
+        config.ttsModel,
+        opts.voiceId ?? config.defaultVoiceId,
+      ),
     },
   });
   return advance(created.id);
@@ -197,9 +200,9 @@ export async function startGeneration(opts: {
 
 /**
  * Re-run TTS + video with an edited script (keeps caption unless provided).
- * Presenter and voice can be swapped at the same time; if the item's stored
- * voice is no longer in the catalogue (e.g. a legacy provider id) and none is
- * given, fall back to the org default.
+ * Presenter and voice can be swapped at the same time. The voice is resolved
+ * against the org's current TTS model: a voice from another provider (e.g. a
+ * legacy id on an old item) falls back to that provider's default.
  */
 export async function regenerateVideo(
   id: string,
@@ -210,12 +213,14 @@ export async function regenerateVideo(
     voiceId?: string;
   },
 ) {
-  let voiceId = opts.voiceId;
-  if (!voiceId) {
-    const item = await db.mediaItem.findUniqueOrThrow({ where: { id } });
-    if (!isVoiceId(item.voiceId))
-      voiceId = (await getOrgConfig()).defaultVoiceId;
-  }
+  const [item, config] = await Promise.all([
+    db.mediaItem.findUniqueOrThrow({ where: { id } }),
+    getOrgConfig(),
+  ]);
+  const voiceId = resolveVoiceFor(
+    config.ttsModel,
+    opts.voiceId ?? item.voiceId,
+  );
   await db.mediaItem.update({
     where: { id },
     data: {

@@ -1,9 +1,11 @@
 "use client";
 
 import { Check } from "lucide-react";
+import { useEffect } from "react";
 
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
+import { defaultVoiceFor, type TtsProvider } from "~/server/voices";
 import { api } from "~/trpc/react";
 
 const GENDER_LABEL: Record<string, string> = {
@@ -12,17 +14,27 @@ const GENDER_LABEL: Record<string, string> = {
   neutral: "N",
 };
 
-/** Grid of voice chips; independent of presenters so any voice fits any face. */
+/**
+ * Grid of voice chips for one TTS provider; independent of presenters so any
+ * voice fits any face. If `value` isn't valid for `provider` (e.g. the model
+ * was switched), the selection is reset to that provider's default.
+ */
 export function VoicePicker({
   value,
   onChange,
+  provider,
   disabled = false,
 }: {
   value: string | undefined;
   onChange: (id: string) => void;
+  provider: TtsProvider;
   disabled?: boolean;
 }) {
-  const voices = api.voice.list.useQuery();
+  const voices = api.voice.list.useQuery({ provider });
+  const valid = voices.data?.some((v) => v.id === value) ?? true;
+  useEffect(() => {
+    if (voices.data && !valid) onChange(defaultVoiceFor(provider));
+  }, [voices.data, valid, provider, onChange]);
   if (!voices.data) {
     return (
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">

@@ -65,7 +65,7 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 | RSS feeds | News ingestion | `rss-parser`; manual refresh + stale-on-load (no cron) |
 | [Tavily Extract](https://docs.tavily.com/#extract-webpages) | Article enrichment | Markdown content + images; optional |
 | OpenAI | Script + caption | `gpt-5.6-terra`, Responses API with zod structured output |
-| [fal.ai TTS](https://fal.ai/models/fal-ai/elevenlabs/tts/multilingual-v2/api) | Text → speech | `fal-ai/elevenlabs/tts/multilingual-v2` by default (turbo-v2.5 / eleven-v3 / legacy MiniMax selectable); curated ElevenLabs preset voices in `src/server/voices.ts`, chosen per video |
+| [fal.ai TTS](https://fal.ai/models/fal-ai/elevenlabs/tts/multilingual-v2/api) | Text → speech | `fal-ai/elevenlabs/tts/multilingual-v2` by default (turbo-v2.5 / eleven-v3 / legacy MiniMax selectable); curated preset voices per provider in `src/server/voices.ts`; the selected model decides which set is offered, voice chosen per video |
 | [Veed Fabric 1.0 (fal.ai)](https://fal.ai/models/veed/fabric-1.0/api) | Video generation | `image_url` + `audio_url` + `resolution` → MP4 |
 | X / Instagram | Publishing | Mocked behind a `Publisher` interface (`src/server/lib/publish.ts`) |
 

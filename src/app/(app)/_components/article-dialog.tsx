@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { hostname, timeAgo } from "~/lib/format";
+import { providerForModel } from "~/server/voices";
 import { api, type RouterOutputs } from "~/trpc/react";
 
 type FeedArticle = RouterOutputs["article"]["feed"]["items"][number];
@@ -98,10 +99,16 @@ export function ArticleDialog({
               <PresenterPicker value={presenterId} onChange={setPresenterId} />
             </div>
 
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Voice</p>
-              <VoicePicker value={voiceId} onChange={setVoiceId} />
-            </div>
+            {config.data && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Voice</p>
+                <VoicePicker
+                  value={voiceId}
+                  onChange={setVoiceId}
+                  provider={providerForModel(config.data.ttsModel)}
+                />
+              </div>
+            )}
 
             <DialogFooter className="items-center">
               {existing && (

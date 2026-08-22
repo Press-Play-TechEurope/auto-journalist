@@ -25,30 +25,9 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { VoicePicker } from "~/components/voice-picker";
+import { isTtsModel, TTS_MODELS, type TtsModel } from "~/server/tts-models";
+import { PROVIDER_LABEL, providerForModel } from "~/server/voices";
 import { api } from "~/trpc/react";
-
-const TTS_MODELS = [
-  {
-    value: "fal-ai/elevenlabs/tts/multilingual-v2",
-    label: "ElevenLabs Multilingual v2 (fal.ai)",
-  },
-  {
-    value: "fal-ai/elevenlabs/tts/turbo-v2.5",
-    label: "ElevenLabs Turbo v2.5 (fal.ai)",
-  },
-  {
-    value: "fal-ai/elevenlabs/tts/eleven-v3",
-    label: "ElevenLabs Eleven v3 (fal.ai)",
-  },
-  {
-    value: "fal-ai/minimax/speech-02-hd",
-    label: "MiniMax Speech-02 HD (fal.ai) — legacy voices",
-  },
-  {
-    value: "fal-ai/minimax/speech-02-turbo",
-    label: "MiniMax Speech-02 Turbo (fal.ai) — legacy voices",
-  },
-];
 
 export function SettingsForm() {
   const utils = api.useUtils();
@@ -61,7 +40,8 @@ export function SettingsForm() {
     string | undefined
   >();
   const [defaultVoiceId, setDefaultVoiceId] = useState<string | undefined>();
-  const [ttsModel, setTtsModel] = useState(TTS_MODELS[0]!.value);
+  const [ttsModel, setTtsModel] = useState<TtsModel>(TTS_MODELS[0].value);
+  const provider = providerForModel(ttsModel);
 
   useEffect(() => {
     if (!config.data) return;
@@ -70,7 +50,11 @@ export function SettingsForm() {
     setTargetSeconds(config.data.targetSeconds);
     setDefaultPresenterId(config.data.defaultPresenterId ?? undefined);
     setDefaultVoiceId(config.data.defaultVoiceId);
-    setTtsModel(config.data.ttsModel);
+    setTtsModel(
+      isTtsModel(config.data.ttsModel)
+        ? config.data.ttsModel
+        : TTS_MODELS[0].value,
+    );
   }, [config.data]);
 
   const update = api.config.update.useMutation({
@@ -139,37 +123,16 @@ export function SettingsForm() {
                 required
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="targetSeconds">Target length (seconds)</Label>
-                <Input
-                  id="targetSeconds"
-                  type="number"
-                  min={15}
-                  max={180}
-                  value={targetSeconds}
-                  onChange={(e) => setTargetSeconds(Number(e.target.value))}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Text-to-speech model</Label>
-                <Select
-                  items={TTS_MODELS}
-                  value={ttsModel}
-                  onValueChange={(v) => v && setTtsModel(String(v))}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TTS_MODELS.map((m) => (
-                      <SelectItem key={m.value} value={m.value}>
-                        {m.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="targetSeconds">Target length (seconds)</Label>
+              <Input
+                id="targetSeconds"
+                type="number"
+                min={15}
+                max={180}
+                value={targetSeconds}
+                onChange={(e) => setTargetSeconds(Number(e.target.value))}
+              />
             </div>
           </CardContent>
         </Card>
@@ -191,11 +154,40 @@ export function SettingsForm() {
               />
             </div>
             <div className="space-y-2">
+              <Label>Text-to-speech model</Label>
+              <Select
+                items={TTS_MODELS}
+                value={ttsModel}
+                onValueChange={(v) => {
+                  const next = String(v);
+                  if (isTtsModel(next)) setTtsModel(next);
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TTS_MODELS.map((m) => (
+                    <SelectItem key={m.value} value={m.value}>
+                      {m.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-muted-foreground text-xs">
+                Determines which voices are available everywhere.
+              </p>
+            </div>
+            <div className="space-y-2">
               <Label>Default voice</Label>
               <VoicePicker
                 value={defaultVoiceId}
                 onChange={setDefaultVoiceId}
+                provider={provider}
               />
+              <p className="text-muted-foreground text-xs">
+                Showing {PROVIDER_LABEL[provider]} voices.
+              </p>
             </div>
           </CardContent>
         </Card>
