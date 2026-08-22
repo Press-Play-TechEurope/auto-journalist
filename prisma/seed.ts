@@ -34,24 +34,21 @@ const PRESENTERS = [
     key: "maya",
     name: "Maya Chen",
     bio: "Lead anchor. Measured, authoritative delivery.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=1024&q=80&fit=crop",
+    imageUrl: "/presenters/gpt1.png",
     voiceId: "Wise_Woman",
   },
   {
     key: "daniel",
     name: "Daniel Okafor",
     bio: "Evening news. Deep, steady voice.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1024&q=80&fit=crop",
+    imageUrl: "/presenters/gpt2.png",
     voiceId: "Deep_Voice_Man",
   },
   {
     key: "sofia",
     name: "Sofia Reyes",
     bio: "Tech & culture desk. Warm and upbeat.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=1024&q=80&fit=crop",
+    imageUrl: "/presenters/gpt3.png",
     voiceId: "Calm_Woman",
   },
   {
