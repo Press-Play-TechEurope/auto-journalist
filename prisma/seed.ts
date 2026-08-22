@@ -10,6 +10,27 @@ const db = new PrismaClient();
 
 const PRESENTERS = [
   {
+    key: "zach",
+    name: "Zach",
+    bio: "Anchor. Direct and conversational.",
+    imageUrl: "/presenters/zach.jpg",
+    voiceId: "Patient_Man",
+  },
+  {
+    key: "ty",
+    name: "Ty",
+    bio: "Co-anchor. Deep, steady voice.",
+    imageUrl: "/presenters/ty.jpg",
+    voiceId: "Deep_Voice_Man",
+  },
+  {
+    key: "eliska",
+    name: "Eliska",
+    bio: "Correspondent. Warm and upbeat.",
+    imageUrl: "/presenters/eliska.jpg",
+    voiceId: "Calm_Woman",
+  },
+  {
     key: "maya",
     name: "Maya Chen",
     bio: "Lead anchor. Measured, authoritative delivery.",

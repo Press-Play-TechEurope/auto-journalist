@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 import { fal } from "@fal-ai/client";
 
 import { env } from "~/env";
@@ -48,6 +51,29 @@ export async function synthesizeSpeech(opts: {
   return { audioUrl: data.audio.url, durationMs: data.duration_ms };
 }
 
+/**
+ * fal needs a publicly fetchable image URL. Presenter images that live in
+ * `public/` are stored as root-relative paths (e.g. `/presenters/zach.jpg`),
+ * which fal can't reach from localhost — upload those to fal storage first.
+ * Absolute URLs pass through untouched.
+ */
+const uploadedImages = new Map<string, string>();
+async function resolveImageUrl(imageUrl: string): Promise<string> {
+  if (!imageUrl.startsWith("/")) return imageUrl;
+  const cached = uploadedImages.get(imageUrl);
+  if (cached) return cached;
+  const file = path.join(process.cwd(), "public", imageUrl);
+  const bytes = await readFile(file);
+  const ext = path.extname(file).slice(1).toLowerCase();
+  const type =
+    ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+  const url = await client().storage.upload(
+    new File([bytes], path.basename(file), { type }),
+  );
+  uploadedImages.set(imageUrl, url);
+  return url;
+}
+
 /** Submit a Fabric talking-head job. Returns the queue request id. */
 export async function submitTalkingHead(opts: {
   imageUrl: string;
@@ -56,7 +82,7 @@ export async function submitTalkingHead(opts: {
 }): Promise<string> {
   const { request_id } = await client().queue.submit(FABRIC_MODEL, {
     input: {
-      image_url: opts.imageUrl,
+      image_url: await resolveImageUrl(opts.imageUrl),
       audio_url: opts.audioUrl,
       resolution: opts.resolution ?? "480p",
     },
