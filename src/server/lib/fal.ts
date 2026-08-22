@@ -6,6 +6,7 @@ import { fal } from "@fal-ai/client";
 import { env } from "~/env";
 
 export const FABRIC_MODEL = "veed/fabric-1.0";
+export const SUBTITLES_MODEL = "veed/subtitles";
 
 let configured = false;
 function client() {
@@ -124,6 +125,58 @@ export async function checkTalkingHead(
     const data = result.data as { video?: { url?: string } };
     if (!data?.video?.url)
       return { state: "error", message: "Fabric returned no video url" };
+    return { state: "done", videoUrl: data.video.url };
+  } catch (err) {
+    return {
+      state: "error",
+      message: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+/**
+ * Submit a veed/subtitles job. With no `subtitles` array the model auto-
+ * transcribes the video's audio and burns the captions in (TikTok-style).
+ * Returns the request id to poll with `checkSubtitles`.
+ */
+export async function submitSubtitles(opts: {
+  videoUrl: string;
+}): Promise<string> {
+  const { request_id } = await client().queue.submit(SUBTITLES_MODEL, {
+    input: {
+      video_url: opts.videoUrl,
+    },
+    storageSettings: KEEP_FOREVER,
+  });
+  return request_id;
+}
+
+export type SubtitlesStatus =
+  | { state: "queued"; position?: number }
+  | { state: "running" }
+  | { state: "done"; videoUrl: string }
+  | { state: "error"; message: string };
+
+/** Check a veed/subtitles job; fetches the result when complete. */
+export async function checkSubtitles(
+  requestId: string,
+): Promise<SubtitlesStatus> {
+  const f = client();
+  try {
+    const status = await f.queue.status(SUBTITLES_MODEL, {
+      requestId,
+      logs: false,
+    });
+    if (status.status === "IN_QUEUE")
+      return { state: "queued", position: status.queue_position };
+    if (status.status === "IN_PROGRESS") return { state: "running" };
+    const result = await f.queue.result(SUBTITLES_MODEL, { requestId });
+    const data = result.data as { video?: { url?: string } };
+    if (!data?.video?.url)
+      return {
+        state: "error",
+        message: "veed/subtitles returned no video url",
+      };
     return { state: "done", videoUrl: data.video.url };
   } catch (err) {
     return {

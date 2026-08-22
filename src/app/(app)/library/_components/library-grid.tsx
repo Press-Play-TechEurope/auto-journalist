@@ -95,9 +95,9 @@ function LibraryCard({ item }: { item: Item }) {
       className="group bg-card border-border/60 flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="bg-muted relative aspect-[3/4] overflow-hidden">
-        {item.videoUrl ? (
+        {item.subtitledVideoUrl ?? item.videoUrl ? (
           <video
-            src={item.videoUrl}
+            src={item.subtitledVideoUrl ?? item.videoUrl ?? undefined}
             className="size-full object-cover"
             muted
             playsInline
@@ -121,7 +121,7 @@ function LibraryCard({ item }: { item: Item }) {
         <div className="absolute top-2 left-2">
           <StatusBadge status={item.status} />
         </div>
-        {item.videoUrl && (
+        {(item.subtitledVideoUrl ?? item.videoUrl) && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
             <span className="bg-primary/80 flex size-11 items-center justify-center rounded-full text-white shadow-lg backdrop-blur-sm">
               <Play className="ml-0.5 size-5" />

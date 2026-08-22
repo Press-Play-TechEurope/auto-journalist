@@ -27,7 +27,10 @@ export function usePipelineDriver(
 
   useEffect(() => {
     if (!id || !status || isTerminal(status) || isPending) return;
-    const delay = status === "GENERATING_VIDEO" ? 4000 : 1200;
+    const delay =
+      status === "GENERATING_VIDEO" || status === "GENERATING_SUBTITLES"
+        ? 4000
+        : 1200;
     const t = setTimeout(() => mutate({ id }), delay);
     return () => clearTimeout(t);
   }, [id, status, isPending, mutate]);

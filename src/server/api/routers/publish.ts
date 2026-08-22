@@ -16,7 +16,16 @@ export const publishRouter = createTRPCRouter({
       const item = await ctx.db.mediaItem.findUniqueOrThrow({
         where: { id: input.mediaItemId },
       });
-      if (item.status !== "READY" || !item.videoUrl) {
+      if (item.status !== "READY") {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Video is not ready yet.",
+        });
+      }
+      // Publish the version with subtitles burned in when we have it; fall
+      // back to the bare Fabric output if the subtitle pass failed/skipped.
+      const videoUrl = item.subtitledVideoUrl ?? item.videoUrl;
+      if (!videoUrl) {
         throw new TRPCError({
           code: "PRECONDITION_FAILED",
           message: "Video is not ready yet.",
@@ -24,7 +33,7 @@ export const publishRouter = createTRPCRouter({
       }
       const result = await publishers[input.platform].publish({
         mediaItemId: item.id,
-        videoUrl: item.videoUrl,
+        videoUrl,
         caption: item.caption ?? "",
       });
       return ctx.db.publication.upsert({

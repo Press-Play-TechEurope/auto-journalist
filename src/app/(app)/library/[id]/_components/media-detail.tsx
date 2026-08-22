@@ -3,6 +3,7 @@
 import {
   AlertCircle,
   ArrowLeft,
+  Captions,
   Check,
   CheckCircle2,
   Copy,
@@ -179,9 +180,9 @@ export function MediaDetail({ id }: { id: string }) {
         {/* Left: video */}
         <div className="mx-auto w-full max-w-[360px] space-y-4 lg:mx-0">
           <div className="relative overflow-hidden rounded-2xl border bg-black shadow-lg">
-            {item.videoUrl ? (
+            {item.subtitledVideoUrl ?? item.videoUrl ? (
               <video
-                src={item.videoUrl}
+                src={item.subtitledVideoUrl ?? item.videoUrl ?? undefined}
                 controls
                 playsInline
                 className="aspect-[3/4] w-full object-contain"
@@ -214,6 +215,28 @@ export function MediaDetail({ id }: { id: string }) {
           </div>
 
           <Stepper status={item.status} />
+
+          {item.subtitledVideoUrl && (
+            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+              <Captions className="size-3.5" /> Subtitles burned in
+            </div>
+          )}
+
+          {item.videoUrl && item.subtitledVideoUrl && (
+            <div className="space-y-1">
+              <Label className="text-muted-foreground text-xs">
+                No-subtitles version
+              </Label>
+              <a
+                href={item.videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary inline-flex items-center gap-1 text-xs hover:underline"
+              >
+                <ExternalLink className="size-3" /> Open original MP4
+              </a>
+            </div>
+          )}
 
           {item.audioUrl && (
             <div className="space-y-1">
@@ -479,7 +502,7 @@ export function MediaDetail({ id }: { id: string }) {
 
       <PublishSuccessDialog
         publication={successPub}
-        videoUrl={item.videoUrl}
+        videoUrl={item.subtitledVideoUrl ?? item.videoUrl}
         caption={item.caption}
         onClose={() => setSuccessPub(null)}
       />

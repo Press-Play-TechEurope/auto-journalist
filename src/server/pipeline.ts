@@ -2,7 +2,9 @@ import { type MediaStatus, type Prisma } from "../../generated/prisma";
 import { db } from "~/server/db";
 import { fetchArticleText } from "~/server/lib/article-fetch";
 import {
+  checkSubtitles,
   checkTalkingHead,
+  submitSubtitles,
   submitTalkingHead,
   synthesizeSpeech,
 } from "~/server/lib/fal";
@@ -157,8 +159,25 @@ export async function advance(id: string): Promise<MediaItemFull> {
       case "GENERATING_VIDEO": {
         if (!item.falRequestId) throw new Error("Missing fal request id");
         const st = await checkTalkingHead(item.falRequestId);
+        if (st.state === "done") {
+          // Fabric is done; kick off the subtitles pass and store both URLs.
+          const subtitleRequestId = await submitSubtitles({
+            videoUrl: st.videoUrl,
+          });
+          return setStatus(id, "GENERATING_SUBTITLES", {
+            videoUrl: st.videoUrl,
+            subtitleRequestId,
+          });
+        }
+        if (st.state === "error") throw new Error(st.message);
+        return item; // still cooking
+      }
+      case "GENERATING_SUBTITLES": {
+        if (!item.subtitleRequestId)
+          throw new Error("Missing subtitle request id");
+        const st = await checkSubtitles(item.subtitleRequestId);
         if (st.state === "done")
-          return setStatus(id, "READY", { videoUrl: st.videoUrl });
+          return setStatus(id, "READY", { subtitledVideoUrl: st.videoUrl });
         if (st.state === "error") throw new Error(st.message);
         return item; // still cooking
       }
@@ -231,7 +250,9 @@ export async function regenerateVideo(
       voiceId,
       audioUrl: null,
       videoUrl: null,
+      subtitledVideoUrl: null,
       falRequestId: null,
+      subtitleRequestId: null,
       error: null,
     },
   });
@@ -242,6 +263,10 @@ export async function regenerateVideo(
 export async function retry(id: string) {
   const item = await getMediaItem(id);
   if (item.status !== "FAILED") return item;
+  // If we already finished Fabric but the subtitle pass failed, resume there
+  // so we don't re-render the talking-head video unnecessarily.
+  if (item.videoUrl && !item.subtitledVideoUrl)
+    return resumeFrom(id, "GENERATING_SUBTITLES");
   const next: MediaStatus = !item.script
     ? "QUEUED"
     : !item.audioUrl
@@ -252,6 +277,15 @@ export async function retry(id: string) {
   await db.mediaItem.update({
     where: { id },
     data: { status: next, error: null },
+  });
+  return advance(id);
+}
+
+/** Drop the item into the given state (clearing any error) and advance it. */
+async function resumeFrom(id: string, status: MediaStatus) {
+  await db.mediaItem.update({
+    where: { id },
+    data: { status, error: null },
   });
   return advance(id);
 }

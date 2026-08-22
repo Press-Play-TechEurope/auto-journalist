@@ -10,6 +10,7 @@ export const STATUS_LABEL: Record<MediaStatus, string> = {
   SCRIPTING: "Writing script",
   GENERATING_AUDIO: "Recording voice",
   GENERATING_VIDEO: "Rendering video",
+  GENERATING_SUBTITLES: "Burning subtitles",
   READY: "Ready",
   FAILED: "Failed",
 };
@@ -19,6 +20,7 @@ export const STEPS: MediaStatus[] = [
   "SCRIPTING",
   "GENERATING_AUDIO",
   "GENERATING_VIDEO",
+  "GENERATING_SUBTITLES",
   "READY",
 ];
 

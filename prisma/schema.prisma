@@ -91,28 +91,33 @@ enum MediaStatus {
   SCRIPTING
   GENERATING_AUDIO
   GENERATING_VIDEO
+  GENERATING_SUBTITLES
   READY
   FAILED
 }
 
 /// One generated talking-head video (plus its script and social copy).
 model MediaItem {
-  id           String        @id @default(cuid())
-  articleId    String
-  article      Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  presenterId  String
-  presenter    Presenter     @relation(fields: [presenterId], references: [id])
-  status       MediaStatus   @default(QUEUED)
-  script       String?
-  caption      String?
-  voiceId      String
-  audioUrl     String?
-  videoUrl     String?
-  falRequestId String?
-  error        String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  publications Publication[]
+  id                String        @id @default(cuid())
+  articleId         String
+  article           Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  presenterId       String
+  presenter         Presenter     @relation(fields: [presenterId], references: [id])
+  status            MediaStatus   @default(QUEUED)
+  script            String?
+  caption           String?
+  voiceId           String
+  audioUrl          String?
+  /// Fabric talking-head video (no subtitles yet).
+  videoUrl          String?
+  /// Fabric output with veed/subtitles burned in — the final deliverable.
+  subtitledVideoUrl String?
+  falRequestId      String?
+  subtitleRequestId String?
+  error             String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  publications      Publication[]
 
   @@index([createdAt(sort: Desc)])
 }

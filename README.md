@@ -25,7 +25,8 @@ Press Play is a single-tenant web app (one shared password — it's a newsroom, 
 3. **Script** — the article content plus your org settings (brand name, tone, target length) go to OpenAI, which returns a spoken script **and** a social caption (structured output). Dense press release in, snappy script out.
 4. **Voice** — the script goes through TTS on fal.ai (ElevenLabs Multilingual v2 by default). Voices are independent of presenters: pick any voice for any face, per video, and swap either when regenerating.
 5. **Video** — audio + presenter image go to [Veed Fabric 1.0 via fal.ai](https://fal.ai/models/veed/fabric-1.0/api), which renders the talking-head MP4.
-6. **Library & publish** — every generated item lands in the media library with its script and caption. Edit the script and **regenerate** the video, then **post to X / Instagram** (mocked for the demo — shows a success dialog with the post preview).
+6. **Subtitles** — the rendered video is passed to [veed/subtitles via fal.ai](https://fal.ai/models/veed/subtitles), which auto-transcribes the audio and burns TikTok-style captions into the MP4. The subtitled video is what gets published and shown in the library.
+7. **Library & publish** — every generated item lands in the media library with its script and caption. Edit the script and **regenerate** the video, then **post to X / Instagram** (mocked for the demo — shows a success dialog with the post preview).
 
 ## Pipeline overview
 
@@ -45,10 +46,13 @@ RSS feeds ──► unified feed (sorted by date)
    Veed Fabric 1.0 (fal.ai queue) ──► talking-head MP4
                  │
                  ▼
+   Veed Subtitles (fal.ai queue) ──► subtitled MP4 (final deliverable)
+                 │
+                 ▼
    Library (edit script ▸ regenerate) ──► Post to X / Instagram (mock)
 ```
 
-The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → GENERATING_AUDIO → GENERATING_VIDEO → READY | FAILED`). Each tRPC `media.advance` call runs **one bounded step** so it fits inside a serverless invocation; the browser keeps calling it until the item is terminal. Video rendering is submitted to the fal queue and polled. Generated audio/video stay on fal's CDN (`expiresIn: "never"`), so no separate object storage is needed.
+The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → GENERATING_AUDIO → GENERATING_VIDEO → GENERATING_SUBTITLES → READY | FAILED`). Each tRPC `media.advance` call runs **one bounded step** so it fits inside a serverless invocation; the browser keeps calling it until the item is terminal. Video rendering + subtitle burning are submitted to the fal queue and polled. Generated audio/video stay on fal's CDN (`expiresIn: "never"`), so no separate object storage is needed.
 
 ## Pages
 
@@ -67,6 +71,7 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 | OpenAI | Script + caption | `gpt-5.6-terra`, Responses API with zod structured output |
 | [fal.ai TTS](https://fal.ai/models/fal-ai/elevenlabs/tts/multilingual-v2/api) | Text → speech | `fal-ai/elevenlabs/tts/multilingual-v2` by default (turbo-v2.5 / eleven-v3 / legacy MiniMax selectable); curated preset voices per provider in `src/server/voices.ts`; the selected model decides which set is offered, voice chosen per video |
 | [Veed Fabric 1.0 (fal.ai)](https://fal.ai/models/veed/fabric-1.0/api) | Video generation | `image_url` + `audio_url` + `resolution` → MP4 |
+| [Veed Subtitles (fal.ai)](https://fal.ai/models/veed/subtitles) | Auto-transcribe + burn captions | `video_url` → MP4 with TikTok-style subtitles (final deliverable) |
 | X / Instagram | Publishing | Mocked behind a `Publisher` interface (`src/server/lib/publish.ts`) |
 
 ## Tech stack
