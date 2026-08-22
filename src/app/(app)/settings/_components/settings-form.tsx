@@ -26,6 +26,11 @@ import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { VoicePicker } from "~/components/voice-picker";
 import { isTtsModel, TTS_MODELS, type TtsModel } from "~/server/tts-models";
+import {
+  isSubtitlePreset,
+  SUBTITLE_PRESETS,
+  type SubtitlePreset,
+} from "~/server/subtitle-presets";
 import { PROVIDER_LABEL, providerForModel } from "~/server/voices";
 import { api } from "~/trpc/react";
 
@@ -41,6 +46,9 @@ export function SettingsForm() {
   >();
   const [defaultVoiceId, setDefaultVoiceId] = useState<string | undefined>();
   const [ttsModel, setTtsModel] = useState<TtsModel>(TTS_MODELS[0].value);
+  const [subtitlePreset, setSubtitlePreset] = useState<SubtitlePreset>(
+    SUBTITLE_PRESETS[0].value,
+  );
   const provider = providerForModel(ttsModel);
 
   useEffect(() => {
@@ -54,6 +62,11 @@ export function SettingsForm() {
       isTtsModel(config.data.ttsModel)
         ? config.data.ttsModel
         : TTS_MODELS[0].value,
+    );
+    setSubtitlePreset(
+      isSubtitlePreset(config.data.subtitlePreset)
+        ? config.data.subtitlePreset
+        : SUBTITLE_PRESETS[0].value,
     );
   }, [config.data]);
 
@@ -80,6 +93,7 @@ export function SettingsForm() {
           defaultPresenterId: defaultPresenterId ?? null,
           defaultVoiceId: defaultVoiceId!,
           ttsModel,
+          subtitlePreset,
         });
       }}
     >
@@ -189,6 +203,47 @@ export function SettingsForm() {
                 Showing {PROVIDER_LABEL[provider]} voices.
               </p>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>Subtitles</CardTitle>
+            <CardDescription>
+              Style used by veed/subtitles when it auto-transcribes and burns
+              captions into the final video.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Label>Subtitle preset</Label>
+            <Select
+              items={SUBTITLE_PRESETS}
+              value={subtitlePreset}
+              onValueChange={(v) => {
+                const next = String(v);
+                if (isSubtitlePreset(next)) setSubtitlePreset(next);
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SUBTITLE_PRESETS.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>
+                    {p.label}{" "}
+                    {p.tier === "dynamic" ? (
+                      <span className="text-muted-foreground ml-1 text-xs">
+                        (2× rate)
+                      </span>
+                    ) : null}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-muted-foreground text-xs">
+              Basic presets cost 1×, dynamic presets cost 2× — both auto-
+              transcribe the audio and burn captions into the MP4.
+            </p>
           </CardContent>
         </Card>
       </div>

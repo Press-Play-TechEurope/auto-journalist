@@ -40,7 +40,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
-import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { VoicePicker } from "~/components/voice-picker";
@@ -54,11 +53,31 @@ import { type Platform } from "../../../../../../generated/prisma";
 type Item = RouterOutputs["media"]["byId"];
 type Publication = Item["publications"][number];
 
-const PLATFORM_META: Record<Platform, { label: string; icon: typeof AtSign }> =
-  {
-    X: { label: "X", icon: AtSign },
-    INSTAGRAM: { label: "Instagram", icon: Camera },
-  };
+const PLATFORM_META: Record<
+  Platform,
+  { label: string; icon: typeof AtSign; buttonClass: string }
+> = {
+  X: {
+    label: "X",
+    icon: AtSign,
+    buttonClass:
+      "bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200",
+  },
+  INSTAGRAM: {
+    label: "Instagram",
+    icon: Camera,
+    buttonClass:
+      "bg-gradient-to-r from-[#833ab4] via-[#e1306c] to-[#f77737] text-white hover:opacity-90",
+  },
+};
+
+function XLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 export function MediaDetail({ id }: { id: string }) {
   const router = useRouter();
@@ -73,6 +92,7 @@ export function MediaDetail({ id }: { id: string }) {
   const [presenterId, setPresenterId] = useState<string | undefined>();
   const [voiceId, setVoiceId] = useState<string | undefined>();
   const [successPub, setSuccessPub] = useState<Publication | null>(null);
+  const [confirmPlatform, setConfirmPlatform] = useState<Platform | null>(null);
 
   // Sync editors when server copy changes (e.g. after scripting finishes).
   useEffect(() => {
@@ -123,6 +143,7 @@ export function MediaDetail({ id }: { id: string }) {
   });
   const publish = api.publish.post.useMutation({
     onSuccess: (pub) => {
+      setConfirmPlatform(null);
       setSuccessPub(pub);
       refetch();
     },
@@ -213,6 +234,60 @@ export function MediaDetail({ id }: { id: string }) {
               </>
             )}
           </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {(Object.keys(PLATFORM_META) as Platform[]).map((platform) => {
+              const { label, icon: Icon, buttonClass } =
+                PLATFORM_META[platform];
+              const done = publishedOn.has(platform);
+              const pending =
+                publish.isPending && publish.variables?.platform === platform;
+              return (
+                <Button
+                  key={platform}
+                  size="lg"
+                  className={cn(buttonClass, "font-semibold")}
+                  onClick={() => setConfirmPlatform(platform)}
+                  disabled={item.status !== "READY" || publish.isPending}
+                >
+                  {pending ? (
+                    <Loader2
+                      data-icon="inline-start"
+                      className="animate-spin"
+                    />
+                  ) : done ? (
+                    <Check data-icon="inline-start" />
+                  ) : (
+                    <Icon data-icon="inline-start" />
+                  )}
+                  {done ? `Post again` : `Post to ${label}`}
+                </Button>
+              );
+            })}
+          </div>
+          {item.status !== "READY" && (
+            <p className="text-muted-foreground text-xs">
+              Publishing unlocks once the video is ready.
+            </p>
+          )}
+          {item.publications.length > 0 && (
+            <ul className="space-y-1 text-sm">
+              {item.publications.map((p) => (
+                <li key={p.id} className="flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+                  <span>{PLATFORM_META[p.platform].label}</span>
+                  <span className="text-muted-foreground">
+                    · {timeAgo(p.postedAt)}
+                  </span>
+                  {p.externalUrl && (
+                    <span className="text-muted-foreground ml-auto truncate text-xs">
+                      {p.externalUrl}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
 
           <Stepper status={item.status} />
 
@@ -431,74 +506,20 @@ export function MediaDetail({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Publish</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                {(Object.keys(PLATFORM_META) as Platform[]).map((platform) => {
-                  const { label, icon: Icon } = PLATFORM_META[platform];
-                  const done = publishedOn.has(platform);
-                  const pending =
-                    publish.isPending &&
-                    publish.variables?.platform === platform;
-                  return (
-                    <Button
-                      key={platform}
-                      variant={done ? "secondary" : "default"}
-                      onClick={() =>
-                        publish.mutate({ mediaItemId: id, platform })
-                      }
-                      disabled={item.status !== "READY" || publish.isPending}
-                    >
-                      {pending ? (
-                        <Loader2
-                          data-icon="inline-start"
-                          className="animate-spin"
-                        />
-                      ) : done ? (
-                        <Check data-icon="inline-start" />
-                      ) : (
-                        <Icon data-icon="inline-start" />
-                      )}
-                      {done
-                        ? `Posted to ${label} · post again`
-                        : `Post to ${label}`}
-                    </Button>
-                  );
-                })}
-              </div>
-              {item.status !== "READY" && (
-                <p className="text-muted-foreground text-xs">
-                  Publishing unlocks once the video is ready.
-                </p>
-              )}
-              {item.publications.length > 0 && (
-                <>
-                  <Separator />
-                  <ul className="space-y-1 text-sm">
-                    {item.publications.map((p) => (
-                      <li key={p.id} className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
-                        <span>{PLATFORM_META[p.platform].label}</span>
-                        <span className="text-muted-foreground">
-                          · {timeAgo(p.postedAt)}
-                        </span>
-                        {p.externalUrl && (
-                          <span className="text-muted-foreground ml-auto truncate text-xs">
-                            {p.externalUrl}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
+
+      <PublishConfirmDialog
+        platform={confirmPlatform}
+        videoUrl={item.subtitledVideoUrl ?? item.videoUrl}
+        caption={caption}
+        pending={publish.isPending}
+        onConfirm={() =>
+          confirmPlatform &&
+          publish.mutate({ mediaItemId: id, platform: confirmPlatform })
+        }
+        onClose={() => setConfirmPlatform(null)}
+      />
 
       <PublishSuccessDialog
         publication={successPub}
@@ -542,6 +563,126 @@ function Stepper({ status }: { status: Item["status"] }) {
         );
       })}
     </ol>
+  );
+}
+
+function PublishConfirmDialog({
+  platform,
+  videoUrl,
+  caption,
+  pending,
+  onConfirm,
+  onClose,
+}: {
+  platform: Platform | null;
+  videoUrl: string | null;
+  caption: string;
+  pending: boolean;
+  onConfirm: () => void;
+  onClose: () => void;
+}) {
+  const isX = platform === "X";
+  return (
+    <Dialog open={!!platform} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent
+        showCloseButton={false}
+        className={cn(
+          "sm:max-w-md",
+          isX
+            ? "border border-zinc-800 bg-black text-white ring-zinc-800"
+            : "gap-0 overflow-hidden p-0",
+        )}
+      >
+        {platform && (
+          <>
+            {isX ? (
+              <DialogHeader className="flex-row items-center gap-3">
+                <XLogo className="size-5" />
+                <DialogTitle>Post to X</DialogTitle>
+              </DialogHeader>
+            ) : (
+              <>
+                <div className="h-1.5 bg-gradient-to-r from-[#833ab4] via-[#e1306c] to-[#f77737]" />
+                <DialogHeader className="flex-row items-center gap-3 p-4 pb-0">
+                  <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-tr from-[#f77737] via-[#e1306c] to-[#833ab4] text-white">
+                    <Camera className="size-4" />
+                  </span>
+                  <DialogTitle>Share to Instagram</DialogTitle>
+                </DialogHeader>
+              </>
+            )}
+
+            <div
+              className={cn(
+                "overflow-hidden rounded-xl",
+                isX ? "border border-zinc-800" : "mx-4 mt-4 border",
+              )}
+            >
+              {videoUrl && (
+                <video
+                  src={videoUrl}
+                  controls
+                  muted
+                  playsInline
+                  className="aspect-[3/4] max-h-72 w-full bg-black object-contain"
+                />
+              )}
+              {caption && (
+                <p
+                  className={cn(
+                    "line-clamp-4 p-3 text-sm whitespace-pre-wrap",
+                    isX ? "text-zinc-300" : "text-foreground",
+                  )}
+                >
+                  {caption}
+                </p>
+              )}
+            </div>
+
+            <div
+              className={cn(
+                "flex justify-end gap-2",
+                !isX && "p-4 pt-3",
+              )}
+            >
+              <Button
+                variant="ghost"
+                onClick={onClose}
+                disabled={pending}
+                className={cn(
+                  isX &&
+                    "rounded-full text-zinc-300 hover:bg-zinc-900 hover:text-white",
+                )}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={onConfirm}
+                disabled={pending}
+                className={cn(
+                  "font-semibold",
+                  isX
+                    ? "rounded-full bg-white text-black hover:bg-zinc-200"
+                    : "bg-[#0095f6] text-white hover:bg-[#0081d6]",
+                )}
+              >
+                {pending ? (
+                  <Loader2
+                    data-icon="inline-start"
+                    className="animate-spin"
+                  />
+                ) : isX ? (
+                  <XLogo className="size-4" />
+                ) : (
+                  <Camera data-icon="inline-start" />
+                )}
+                {pending ? "Posting…" : isX ? "Post" : "Share"}
+              </Button>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { getOrgConfig } from "~/server/pipeline";
+import { SUBTITLE_PRESET_VALUES } from "~/server/subtitle-presets";
 import { TTS_MODEL_VALUES } from "~/server/tts-models";
 import { isVoiceId, providerForModel } from "~/server/voices";
 
@@ -18,6 +19,7 @@ export const configRouter = createTRPCRouter({
           defaultPresenterId: z.string().nullable(),
           defaultVoiceId: z.string().trim().min(1),
           ttsModel: z.enum(TTS_MODEL_VALUES),
+          subtitlePreset: z.enum(SUBTITLE_PRESET_VALUES),
         })
         .superRefine((v, ctx) => {
           if (!isVoiceId(v.defaultVoiceId, providerForModel(v.ttsModel)))

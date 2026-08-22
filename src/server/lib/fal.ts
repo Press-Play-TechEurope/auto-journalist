@@ -135,16 +135,19 @@ export async function checkTalkingHead(
 }
 
 /**
- * Submit a veed/subtitles job. With no `subtitles` array the model auto-
- * transcribes the video's audio and burns the captions in (TikTok-style).
+ * Submit a veed/subtitles job. The model auto-transcribes the video's audio and
+ * burns the captions in using the chosen `preset` (required). Basic presets
+ * cost 1x, dynamic presets cost 2x — see https://fal.ai/models/veed/subtitles.
  * Returns the request id to poll with `checkSubtitles`.
  */
 export async function submitSubtitles(opts: {
   videoUrl: string;
+  preset: string;
 }): Promise<string> {
   const { request_id } = await client().queue.submit(SUBTITLES_MODEL, {
     input: {
       video_url: opts.videoUrl,
+      preset: opts.preset,
     },
     storageSettings: KEEP_FOREVER,
   });

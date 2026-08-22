@@ -9,6 +9,10 @@ import {
   synthesizeSpeech,
 } from "~/server/lib/fal";
 import { generateScript } from "~/server/lib/openai";
+import {
+  DEFAULT_SUBTITLE_PRESET,
+  isSubtitlePreset,
+} from "~/server/subtitle-presets";
 import { extractArticle } from "~/server/lib/tavily";
 import { resolveVoiceFor } from "~/server/voices";
 
@@ -161,8 +165,16 @@ export async function advance(id: string): Promise<MediaItemFull> {
         const st = await checkTalkingHead(item.falRequestId);
         if (st.state === "done") {
           // Fabric is done; kick off the subtitles pass and store both URLs.
+          // `preset` is required by veed/subtitles and comes from org config;
+          // fall back to the module default if a legacy DB row has an
+          // unrecognised value.
+          const config = await getOrgConfig();
+          const preset = isSubtitlePreset(config.subtitlePreset)
+            ? config.subtitlePreset
+            : DEFAULT_SUBTITLE_PRESET;
           const subtitleRequestId = await submitSubtitles({
             videoUrl: st.videoUrl,
+            preset,
           });
           return setStatus(id, "GENERATING_SUBTITLES", {
             videoUrl: st.videoUrl,

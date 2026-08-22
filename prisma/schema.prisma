@@ -24,6 +24,8 @@ model OrgConfig {
   defaultVoiceId     String     @default("Brian")
   /// fal.ai TTS endpoint id, e.g. fal-ai/elevenlabs/tts/multilingual-v2
   ttsModel           String     @default("fal-ai/elevenlabs/tts/multilingual-v2")
+  /// veed/subtitles preset (basic = 1x rate, dynamic = 2x rate).
+  subtitlePreset     String     @default("casper")
   updatedAt          DateTime   @updatedAt
 }
 
