@@ -66,7 +66,7 @@ export function Feed() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
             Newsroom feed
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -115,12 +115,14 @@ export function Feed() {
       {feed.isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 9 }).map((_, i) => (
-            <Skeleton key={i} className="h-56 rounded-xl" />
+            <Skeleton key={i} className="h-56 rounded-2xl" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center">
-          <Rss className="text-muted-foreground size-8" />
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed py-16 text-center">
+          <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full">
+            <Rss className="size-6" />
+          </div>
           <p className="text-muted-foreground text-sm">
             {sources.data?.length
               ? "No articles yet — try refreshing."
@@ -176,22 +178,23 @@ function ArticleCard({
     <button
       type="button"
       onClick={onClick}
-      className="group bg-card focus-visible:ring-ring/50 flex flex-col overflow-hidden rounded-xl border text-left transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:outline-none"
+      className="group bg-card border-border/60 focus-visible:ring-ring/50 flex flex-col overflow-hidden rounded-2xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-3 focus-visible:outline-none"
     >
-      <div className="bg-muted relative aspect-[16/9] w-full overflow-hidden">
+      <div className="from-primary/15 via-muted to-muted relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br">
         {article.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={article.imageUrl}
             alt=""
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (
-          <div className="text-muted-foreground flex size-full items-center justify-center">
-            <Rss className="size-6" />
+          <div className="text-primary/50 flex size-full items-center justify-center">
+            <Rss className="size-7" />
           </div>
         )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/30 to-transparent" />
         {latest && (
           <div className="absolute top-2 right-2">
             <StatusBadge status={latest.status} />

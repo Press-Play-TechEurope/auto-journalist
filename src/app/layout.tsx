@@ -1,7 +1,8 @@
 import "~/styles/globals.css";
 
 import { type Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Space_Grotesk } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 
 import { Toaster } from "~/components/ui/sonner";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -17,16 +18,27 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${geist.variable} ${spaceGrotesk.variable}`}
+      suppressHydrationWarning
+    >
       <body className="bg-background text-foreground min-h-screen font-sans antialiased">
-        <TRPCReactProvider>
-          {children}
-          <Toaster richColors position="bottom-right" />
-        </TRPCReactProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <TRPCReactProvider>
+            {children}
+            <Toaster richColors position="bottom-right" />
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -86,7 +86,7 @@ export function SettingsForm() {
     >
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">Settings</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
           <p className="text-muted-foreground text-sm">
             Org-wide defaults used for every generated video.
           </p>

@@ -22,7 +22,7 @@ export function LibraryGrid() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
             Media library
           </h1>
           <p className="text-muted-foreground text-sm">
@@ -48,12 +48,14 @@ export function LibraryGrid() {
       {list.isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
+            <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed py-16 text-center">
-          <Clapperboard className="text-muted-foreground size-8" />
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed py-16 text-center">
+          <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full">
+            <Clapperboard className="size-6" />
+          </div>
           <p className="text-muted-foreground text-sm">
             No videos yet. Pick a story from the feed to generate one.
           </p>
@@ -90,7 +92,7 @@ function LibraryCard({ item }: { item: Item }) {
   return (
     <Link
       href={`/library/${item.id}`}
-      className="group bg-card flex flex-col overflow-hidden rounded-xl border transition-shadow hover:shadow-md"
+      className="group bg-card border-border/60 flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="bg-muted relative aspect-[3/4] overflow-hidden">
         {item.videoUrl ? (
@@ -121,13 +123,13 @@ function LibraryCard({ item }: { item: Item }) {
         </div>
         {item.videoUrl && (
           <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-            <span className="flex size-10 items-center justify-center rounded-full bg-black/60 text-white">
-              <Play className="size-5" />
+            <span className="bg-primary/80 flex size-11 items-center justify-center rounded-full text-white shadow-lg backdrop-blur-sm">
+              <Play className="ml-0.5 size-5" />
             </span>
           </div>
         )}
         {published > 0 && (
-          <Badge className="absolute right-2 bottom-2 gap-1 bg-black/70 text-white hover:bg-black/70">
+          <Badge className="absolute right-2 bottom-2 gap-1 border-white/20 bg-black/60 text-white backdrop-blur-sm hover:bg-black/60">
             <Send className="size-3" /> {published}
           </Badge>
         )}

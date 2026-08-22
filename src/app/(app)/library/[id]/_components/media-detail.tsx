@@ -117,7 +117,7 @@ export function MediaDetail({ id }: { id: string }) {
   if (query.isLoading || !item) {
     return (
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-        <Skeleton className="aspect-[3/4] rounded-xl" />
+        <Skeleton className="aspect-[3/4] rounded-2xl" />
         <div className="space-y-4">
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-40" />
@@ -161,7 +161,7 @@ export function MediaDetail({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
         {/* Left: video */}
         <div className="mx-auto w-full max-w-[360px] space-y-4 lg:mx-0">
-          <div className="relative overflow-hidden rounded-xl border bg-black">
+          <div className="relative overflow-hidden rounded-2xl border bg-black shadow-lg">
             {item.videoUrl ? (
               <video
                 src={item.videoUrl}
@@ -180,10 +180,10 @@ export function MediaDetail({ id }: { id: string }) {
                     item.status === "FAILED" ? "grayscale" : "opacity-60",
                   )}
                 />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white">
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/30 text-white backdrop-blur-[2px]">
                   {busy ? (
                     <>
-                      <Loader2 className="size-8 animate-spin" />
+                      <Loader2 className="text-primary-foreground size-8 animate-spin drop-shadow" />
                       <span className="text-sm font-medium drop-shadow">
                         {STATUS_LABEL[item.status]}…
                       </span>
@@ -246,7 +246,7 @@ export function MediaDetail({ id }: { id: string }) {
                 {hostname(item.article.url)} <ExternalLink className="size-3" />
               </a>
             </div>
-            <h1 className="mt-1 text-xl leading-snug font-semibold tracking-tight">
+            <h1 className="font-display mt-1 text-2xl leading-snug font-semibold tracking-tight">
               {item.article.title}
             </h1>
           </div>
@@ -402,7 +402,7 @@ export function MediaDetail({ id }: { id: string }) {
                   <ul className="space-y-1 text-sm">
                     {item.publications.map((p) => (
                       <li key={p.id} className="flex items-center gap-2">
-                        <CheckCircle2 className="size-4 text-emerald-600" />
+                        <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
                         <span>{PLATFORM_META[p.platform].label}</span>
                         <span className="text-muted-foreground">
                           · {timeAgo(p.postedAt)}
@@ -485,7 +485,7 @@ function PublishSuccessDialog({
         {publication && meta && (
           <>
             <DialogHeader>
-              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
                 <CheckCircle2 className="size-7" />
               </div>
               <DialogTitle className="text-center">

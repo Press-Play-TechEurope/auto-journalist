@@ -16,7 +16,7 @@ export function LoginForm({ next }: { next: string }) {
   );
 
   return (
-    <Card>
+    <Card className="border-border/60 rounded-2xl shadow-lg">
       <CardContent className="pt-6">
         <form action={action} className="space-y-4">
           <input type="hidden" name="next" value={next} />

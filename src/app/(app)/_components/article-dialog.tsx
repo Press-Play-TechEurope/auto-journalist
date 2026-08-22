@@ -85,7 +85,7 @@ export function ArticleDialog({
               <img
                 src={article.imageUrl}
                 alt=""
-                className="max-h-64 w-full rounded-lg object-cover"
+                className="max-h-64 w-full rounded-xl border object-cover"
               />
             )}
 
