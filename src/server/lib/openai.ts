@@ -54,7 +54,7 @@ export async function generateScript(
     ``,
     `Rules:`,
     `- Target length: about ${targetWords} words (~${input.targetSeconds} seconds spoken). Stay within ±15%.`,
-    `- Open with a hook in the first sentence; close with a one-line takeaway.`,
+    `- The script MUST open with the exact greeting: "Hi, I'm ${input.presenterName} from ${input.brandName}." Then immediately follow with a hook sentence; close with a one-line takeaway.`,
     `- Attribute the story to the source by name once (e.g. "according to ${input.article.sourceName}").`,
     `- Only use facts present in the article. Do not invent quotes, numbers, or names.`,
     `- Write for the ear: short sentences, contractions, no lists, no URLs, numbers spelled naturally.`,
