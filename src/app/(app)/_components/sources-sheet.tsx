@@ -38,8 +38,9 @@ import { api, type RouterOutputs } from "~/trpc/react";
 type SourceRow = RouterOutputs["source"]["list"][number];
 type FolderRow = RouterOutputs["folder"]["list"][number];
 
-/** Sentinel for "no folder" in selects (base-ui Select values must be strings). */
+/** Sentinels for selects (base-ui Select values must be strings). */
 const NONE = "__none__";
+const NEW = "__new__";
 
 export function SourcesSheet() {
   const [open, setOpen] = useState(false);
@@ -102,9 +103,22 @@ export function SourcesSheet() {
     () => [
       { value: NONE, label: "No folder" },
       ...(folders.data?.map((f) => ({ value: f.id, label: f.name })) ?? []),
+      { value: NEW, label: "New folder…" },
     ],
     [folders.data],
   );
+
+  /** Prompt for a name and create the folder; resolves to its id or null. */
+  const promptNewFolder = async (): Promise<string | null> => {
+    const name = window.prompt("New folder name")?.trim();
+    if (!name) return null;
+    try {
+      const f = await createFolder.mutateAsync({ name });
+      return f.id;
+    } catch {
+      return null; // error already toasted by the mutation
+    }
+  };
 
   // Group sources: one bucket per folder (in folder order), then unfiled.
   const groups = useMemo(() => {
@@ -173,25 +187,30 @@ export function SourcesSheet() {
                 Add
               </Button>
             </div>
-            {hasFolders && (
-              <Select
-                items={folderItems}
-                value={addFolderId}
-                onValueChange={(v) => v && setAddFolderId(String(v))}
-              >
-                <SelectTrigger className="w-full" aria-label="Folder">
-                  <Folder className="text-muted-foreground" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {folderItems.map((f) => (
-                    <SelectItem key={f.value} value={f.value}>
-                      {f.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select
+              items={folderItems}
+              value={addFolderId}
+              onValueChange={(v) => {
+                if (!v) return;
+                if (v === NEW) {
+                  void promptNewFolder().then((id) => id && setAddFolderId(id));
+                  return;
+                }
+                setAddFolderId(String(v));
+              }}
+            >
+              <SelectTrigger className="w-full" aria-label="Folder">
+                <Folder className="text-muted-foreground" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {folderItems.map((f) => (
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </form>
 
           <form
@@ -274,34 +293,40 @@ export function SourcesSheet() {
                               </span>
                             )}
                           </div>
-                          {hasFolders && (
-                            <div className="mt-2">
-                              <Select
-                                items={folderItems}
-                                value={s.folderId ?? NONE}
-                                onValueChange={(v) => {
-                                  const next = v === NONE ? null : String(v);
-                                  if (next !== (s.folderId ?? null))
-                                    move.mutate({ id: s.id, folderId: next });
-                                }}
+                          <div className="mt-2">
+                            <Select
+                              items={folderItems}
+                              value={s.folderId ?? NONE}
+                              onValueChange={(v) => {
+                                if (v === NEW) {
+                                  void promptNewFolder().then(
+                                    (id) =>
+                                      id &&
+                                      move.mutate({ id: s.id, folderId: id }),
+                                  );
+                                  return;
+                                }
+                                const next = v === NONE ? null : String(v);
+                                if (next !== (s.folderId ?? null))
+                                  move.mutate({ id: s.id, folderId: next });
+                              }}
+                            >
+                              <SelectTrigger
+                                size="sm"
+                                aria-label={`Folder for ${s.name}`}
                               >
-                                <SelectTrigger
-                                  size="sm"
-                                  aria-label={`Folder for ${s.name}`}
-                                >
-                                  <Folder className="text-muted-foreground" />
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {folderItems.map((f) => (
-                                    <SelectItem key={f.value} value={f.value}>
-                                      {f.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
+                                <Folder className="text-muted-foreground" />
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {folderItems.map((f) => (
+                                  <SelectItem key={f.value} value={f.value}>
+                                    {f.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                         <Button
                           variant="ghost"

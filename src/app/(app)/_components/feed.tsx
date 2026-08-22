@@ -17,6 +17,17 @@ import { StatusBadge } from "~/components/status-badge";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Skeleton } from "~/components/ui/skeleton";
+import {
+  Combobox,
+  ComboboxClear,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+  ComboboxValue,
+} from "~/components/ui/combobox";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { hostname, timeAgo } from "~/lib/format";
 import { api, type RouterOutputs } from "~/trpc/react";
@@ -25,6 +36,7 @@ import { ArticleDialog } from "./article-dialog";
 import { SourcesSheet } from "./sources-sheet";
 
 type FeedArticle = RouterOutputs["article"]["feed"]["items"][number];
+type SourceRow = RouterOutputs["source"]["list"][number];
 
 export function Feed() {
   const utils = api.useUtils();
@@ -120,13 +132,13 @@ export function Feed() {
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
         {hasFolders && (
           <Tabs
             value={folderId ?? "all"}
             onValueChange={(v) => selectFolder(String(v))}
           >
-            <TabsList className="h-auto flex-wrap justify-start">
+            <TabsList className="flex-wrap justify-start">
               <TabsTrigger value="all">
                 <FolderOpen data-icon="inline-start" /> All folders
               </TabsTrigger>
@@ -149,24 +161,12 @@ export function Feed() {
             </TabsList>
           </Tabs>
         )}
-
-        <Tabs
-          value={sourceId ?? "all"}
-          onValueChange={(v) =>
-            setSourceId(v === "all" ? undefined : String(v))
-          }
-        >
-          <TabsList className="h-auto flex-wrap justify-start">
-            <TabsTrigger value="all">
-              {folderId ? "All in folder" : "All sources"}
-            </TabsTrigger>
-            {visibleSources.map((s) => (
-              <TabsTrigger key={s.id} value={s.id}>
-                {s.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <SourcePicker
+          sources={visibleSources}
+          value={sourceId}
+          onChange={setSourceId}
+          scopedToFolder={Boolean(folderId)}
+        />
       </div>
 
       {feed.isLoading ? (
@@ -219,6 +219,60 @@ export function Feed() {
       )}
 
       <ArticleDialog article={selected} onClose={() => setSelected(null)} />
+    </div>
+  );
+}
+
+/** Searchable "All sources ▾" dropdown — scales to any number of feeds. */
+function SourcePicker({
+  sources,
+  value,
+  onChange,
+  scopedToFolder,
+}: {
+  sources: SourceRow[];
+  value: string | undefined;
+  onChange: (id: string | undefined) => void;
+  scopedToFolder: boolean;
+}) {
+  const items = [...sources].sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+  );
+  const selected = items.find((s) => s.id === value) ?? null;
+  const placeholder = scopedToFolder ? "All in folder" : "All sources";
+  return (
+    <div className="flex items-center gap-1">
+      <Combobox
+        items={items}
+        value={selected}
+        onValueChange={(v) => onChange(v?.id)}
+        itemToStringLabel={(s: SourceRow) => s.name}
+        isItemEqualToValue={(a: SourceRow, b: SourceRow) => a.id === b.id}
+      >
+        <ComboboxTrigger className="max-w-72" aria-label="Filter by source">
+          <Rss className="text-muted-foreground" />
+          <ComboboxValue placeholder={placeholder}>
+            {(s: SourceRow | null) => (
+              <span className="truncate">{s ? s.name : placeholder}</span>
+            )}
+          </ComboboxValue>
+        </ComboboxTrigger>
+        <ComboboxContent className="w-80">
+          <ComboboxInput placeholder="Search feeds…" autoFocus />
+          <ComboboxEmpty>No feeds match.</ComboboxEmpty>
+          <ComboboxList>
+            {(s: SourceRow) => (
+              <ComboboxItem key={s.id} value={s}>
+                <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {s._count.articles}
+                </span>
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+        </ComboboxContent>
+        {selected && <ComboboxClear aria-label="Clear source filter" />}
+      </Combobox>
     </div>
   );
 }
