@@ -110,9 +110,7 @@ export function Feed() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">
-            Newsroom feed
-          </h1>
+          <h1 className="font-serif text-3xl tracking-tight">Newsroom feed</h1>
           <p className="text-muted-foreground text-sm">
             Pick a story to turn into a presenter video.
           </p>
@@ -123,8 +121,8 @@ export function Feed() {
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search headlines…"
-              className="w-56 pl-8"
+              placeholder="Search articles…"
+              className="w-56 rounded-full pl-8"
             />
           </div>
           <Button
@@ -344,7 +342,7 @@ function ArticleCard({
       <button
         type="button"
         onClick={onClick}
-        className="bg-card border-border/60 focus-visible:ring-ring/50 flex w-full flex-col overflow-hidden rounded-2xl border text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-3 focus-visible:outline-none"
+        className="bg-card border-border/60 focus-visible:ring-ring/50 flex w-full flex-col overflow-hidden rounded-2xl border text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-3 focus-visible:outline-none"
       >
         <div className="from-primary/15 via-muted to-muted relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br">
           {article.imageUrl ? (
@@ -378,10 +376,16 @@ function ArticleCard({
           <h3 className="line-clamp-2 leading-snug font-medium">
             {article.title}
           </h3>
-          {article.summary && (
+          {article.snippet ? (
             <p className="text-muted-foreground line-clamp-2 text-sm">
-              {article.summary}
+              <Snippet text={article.snippet} />
             </p>
+          ) : (
+            article.summary && (
+              <p className="text-muted-foreground line-clamp-2 text-sm">
+                {article.summary}
+              </p>
+            )
           )}
           <div className="text-muted-foreground mt-auto flex items-center gap-2 pt-1 text-xs">
             <span className="truncate">{hostname(article.url)}</span>
@@ -437,5 +441,39 @@ export function StarButton({
         )}
       />
     </button>
+  );
+}
+
+/**
+ * Renders a search snippet from the server. Matches are delimited by \x01 /
+ * \x02 (see searchArticles in the article router) so no HTML is interpreted.
+ */
+function Snippet({ text }: { text: string }) {
+  const parts = text.split(/([\x01\x02])/);
+  let inMatch = false;
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part === "\x01") {
+          inMatch = true;
+          return null;
+        }
+        if (part === "\x02") {
+          inMatch = false;
+          return null;
+        }
+        if (!part) return null;
+        return inMatch ? (
+          <mark
+            key={i}
+            className="text-foreground bg-primary/20 rounded-sm px-0.5"
+          >
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        );
+      })}
+    </>
   );
 }

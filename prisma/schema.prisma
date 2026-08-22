@@ -68,28 +68,33 @@ model Source {
 
 /// A single item from a feed, enriched on demand.
 model Article {
-  id          String      @id @default(cuid())
-  sourceId    String
-  source      Source      @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  guid        String
-  title       String
-  url         String
-  publishedAt DateTime
-  summary     String?
-  imageUrl    String?
+  id           String                   @id @default(cuid())
+  sourceId     String
+  source       Source                   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  guid         String
+  title        String
+  url          String
+  publishedAt  DateTime
+  summary      String?
+  imageUrl     String?
   /// Plain-text body from the simple HTTP fetch.
-  rawContent  String?
+  rawContent   String?
   /// Structured result from Tavily Extract.
-  extract     Json?
-  enrichedAt  DateTime?
+  extract      Json?
+  enrichedAt   DateTime?
   /// Set when the user stars the article; the "Starred" view spans all folders.
-  starredAt   DateTime?
-  createdAt   DateTime    @default(now())
-  mediaItems  MediaItem[]
+  starredAt    DateTime?
+  /// Full-text vector (title A, summary B, body C), kept in sync by a DB
+  /// trigger — see prisma/manual/2026-08-22-article-fulltext-search.sql.
+  /// `db push` creates the column + index but not the trigger; apply that SQL.
+  searchVector Unsupported("tsvector")?
+  createdAt    DateTime                 @default(now())
+  mediaItems   MediaItem[]
 
   @@unique([sourceId, guid])
   @@index([publishedAt(sort: Desc)])
   @@index([starredAt])
+  @@index([searchVector], type: Gin)
 }
 
 enum MediaStatus {
