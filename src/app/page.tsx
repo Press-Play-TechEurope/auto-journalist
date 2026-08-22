@@ -1,10 +1,4 @@
-import {
-  Clapperboard,
-  Mic,
-  Newspaper,
-  Sparkles,
-  Wand2,
-} from "lucide-react";
+import { Clapperboard, Mic, Newspaper, Sparkles, Wand2 } from "lucide-react";
 import Link from "next/link";
 
 import { Logo } from "~/components/logo";
@@ -22,6 +16,18 @@ import {
   ReadMock,
   WriteMock,
 } from "./_components/landing/mocks";
+import { RotatingWord } from "./_components/landing/rotating-word";
+
+const EXPLAIN_TOPICS = [
+  "tech",
+  "AI",
+  "policy",
+  "hardware",
+  "space",
+  "science",
+  "finance",
+  "crypto",
+] as const;
 
 const NAV = [
   { href: "#how-it-works", label: "How it works" },
@@ -250,7 +256,9 @@ export default function LandingPage() {
       <section className="relative mx-auto w-full max-w-6xl px-4 pt-24 pb-20 sm:px-6">
         <Eyebrow icon={Sparkles}>Explain it</Eyebrow>
         <h2 className="mt-5 font-serif text-[34px] leading-tight tracking-tight sm:text-5xl">
-          Explain tech in <span className="italic">∞</span> less time
+          Explain{" "}
+          <RotatingWord words={EXPLAIN_TOPICS} className="text-blue-600" /> in{" "}
+          <span className="italic">∞</span> less time
         </h2>
 
         <div className="relative mt-12">
