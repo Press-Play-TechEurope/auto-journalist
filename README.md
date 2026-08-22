@@ -14,7 +14,7 @@ APIs used:
 
 auto-journalist is a single-tenant web app (one shared password) that watches multiple news sources, helps you pick a story, and produces a short presenter-style video from it:
 
-1. **Aggregate** — add any number of RSS feeds as sources. The app polls them on demand (Refresh button, and automatically on page load when stale) and shows a unified feed sorted by date.
+1. **Aggregate** — add any number of RSS feeds as sources, optionally grouped into folders (e.g. World, Tech). The app polls them on demand (Refresh button, and automatically on page load when stale) and shows a unified feed sorted by date, filterable by folder and source.
 2. **Enrich** — pick a story and a presenter, click **Generate video**:
    - The article is downloaded with a plain HTTP fetch and reduced to text.
    - [Tavily Extract](https://docs.tavily.com/#extract-webpages) pulls structured content + images from the URL (best-effort; falls back to the raw fetch).
@@ -68,8 +68,8 @@ src/
   middleware.ts         redirects to /login unless the session cookie verifies
   server/pipeline.ts    generation state machine
   server/lib/           rss, article-fetch, tavily, openai, fal, publish
-  server/api/routers/   source, article, media, presenter, config, publish
-prisma/schema.prisma    OrgConfig, Presenter, Source, Article, MediaItem, Publication
+  server/api/routers/   source, folder, article, media, presenter, config, publish
+prisma/schema.prisma    OrgConfig, Presenter, Folder, Source, Article, MediaItem, Publication
 prisma/seed.ts          4 presenters, 5 feeds, default config
 ```
 

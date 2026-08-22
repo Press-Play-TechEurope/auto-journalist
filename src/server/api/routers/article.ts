@@ -9,6 +9,8 @@ export const articleRouter = createTRPCRouter({
       z
         .object({
           sourceId: z.string().optional(),
+          /** Filter to sources in this folder. "unfiled" = sources with no folder. */
+          folderId: z.string().optional(),
           q: z.string().trim().optional(),
           cursor: z.string().optional(),
           limit: z.number().int().min(1).max(100).default(40),
@@ -19,6 +21,14 @@ export const articleRouter = createTRPCRouter({
       const items = await ctx.db.article.findMany({
         where: {
           sourceId: input.sourceId,
+          ...(input.folderId
+            ? {
+                source: {
+                  folderId:
+                    input.folderId === "unfiled" ? null : input.folderId,
+                },
+              }
+            : {}),
           ...(input.q
             ? { title: { contains: input.q, mode: "insensitive" } }
             : {}),

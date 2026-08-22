@@ -8,7 +8,10 @@ export const sourceRouter = createTRPCRouter({
   list: publicProcedure.query(({ ctx }) =>
     ctx.db.source.findMany({
       orderBy: { createdAt: "asc" },
-      include: { _count: { select: { articles: true } } },
+      include: {
+        _count: { select: { articles: true } },
+        folder: { select: { id: true, name: true } },
+      },
     }),
   ),
 
@@ -17,6 +20,7 @@ export const sourceRouter = createTRPCRouter({
       z.object({
         feedUrl: z.string().url(),
         name: z.string().trim().min(1).optional(),
+        folderId: z.string().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -42,11 +46,22 @@ export const sourceRouter = createTRPCRouter({
           feedUrl: input.feedUrl,
           name: input.name ?? probe.title,
           siteUrl: probe.siteUrl,
+          folderId: input.folderId ?? null,
         },
       });
       await pollSource(source.id);
       return source;
     }),
+
+  /** Move a source into a folder (or out of all folders with null). */
+  move: publicProcedure
+    .input(z.object({ id: z.string(), folderId: z.string().nullable() }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.source.update({
+        where: { id: input.id },
+        data: { folderId: input.folderId },
+      }),
+    ),
 
   remove: publicProcedure
     .input(z.object({ id: z.string() }))

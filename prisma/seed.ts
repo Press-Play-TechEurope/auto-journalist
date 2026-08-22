@@ -43,31 +43,43 @@ const PRESENTERS = [
   },
 ];
 
-const SOURCES = [
+const FOLDERS = ["World", "Tech"] as const;
+
+const SOURCES: {
+  name: string;
+  feedUrl: string;
+  siteUrl: string;
+  folder: (typeof FOLDERS)[number];
+}[] = [
   {
     name: "BBC News — World",
     feedUrl: "https://feeds.bbci.co.uk/news/world/rss.xml",
     siteUrl: "https://www.bbc.com/news",
+    folder: "World",
   },
   {
     name: "The Verge",
     feedUrl: "https://www.theverge.com/rss/index.xml",
     siteUrl: "https://www.theverge.com",
+    folder: "Tech",
   },
   {
     name: "TechCrunch",
     feedUrl: "https://techcrunch.com/feed/",
     siteUrl: "https://techcrunch.com",
+    folder: "Tech",
   },
   {
     name: "The Guardian — World",
     feedUrl: "https://www.theguardian.com/world/rss",
     siteUrl: "https://www.theguardian.com/world",
+    folder: "World",
   },
   {
     name: "Ars Technica",
     feedUrl: "https://feeds.arstechnica.com/arstechnica/index",
     siteUrl: "https://arstechnica.com",
+    folder: "Tech",
   },
 ];
 
@@ -98,11 +110,27 @@ async function main() {
     );
   }
 
-  for (const s of SOURCES) {
+  const folderIds = new Map<string, string>();
+  for (const [i, name] of FOLDERS.entries()) {
+    const f = await db.folder.upsert({
+      where: { name },
+      create: { name, sortOrder: i },
+      update: { sortOrder: i },
+    });
+    folderIds.set(name, f.id);
+  }
+
+  for (const { folder, ...s } of SOURCES) {
+    const folderId = folderIds.get(folder)!;
     await db.source.upsert({
       where: { feedUrl: s.feedUrl },
-      create: s,
+      create: { ...s, folderId },
       update: { name: s.name, siteUrl: s.siteUrl },
+    });
+    // File never-filed sources; don't override a folder the user chose.
+    await db.source.updateMany({
+      where: { feedUrl: s.feedUrl, folderId: null },
+      data: { folderId },
     });
   }
 
@@ -113,7 +141,7 @@ async function main() {
   });
 
   console.log(
-    `Seeded ${presenters.length} presenters, ${SOURCES.length} sources, org config.`,
+    `Seeded ${presenters.length} presenters, ${FOLDERS.length} folders, ${SOURCES.length} sources, org config.`,
   );
 }
 

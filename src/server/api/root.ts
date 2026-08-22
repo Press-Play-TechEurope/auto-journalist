@@ -1,5 +1,6 @@
 import { articleRouter } from "~/server/api/routers/article";
 import { configRouter } from "~/server/api/routers/config";
+import { folderRouter } from "~/server/api/routers/folder";
 import { mediaRouter } from "~/server/api/routers/media";
 import { presenterRouter } from "~/server/api/routers/presenter";
 import { publishRouter } from "~/server/api/routers/publish";
@@ -13,6 +14,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   source: sourceRouter,
+  folder: folderRouter,
   article: articleRouter,
   media: mediaRouter,
   presenter: presenterRouter,

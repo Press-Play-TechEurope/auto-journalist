@@ -37,16 +37,29 @@ model Presenter {
     mediaItems MediaItem[]
 }
 
+/// A user-defined grouping of RSS sources.
+model Folder {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    sortOrder Int      @default(0)
+    createdAt DateTime @default(now())
+    sources   Source[]
+}
+
 /// An RSS feed we poll.
 model Source {
     id           String    @id @default(cuid())
     name         String
     feedUrl      String    @unique
     siteUrl      String?
+    folderId     String?
+    folder       Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
     lastPolledAt DateTime?
     lastError    String?
     createdAt    DateTime  @default(now())
     articles     Article[]
+
+    @@index([folderId])
 }
 
 /// A single item from a feed, enriched on demand.

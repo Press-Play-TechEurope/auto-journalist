@@ -3,6 +3,8 @@
 import {
   Clapperboard,
   ExternalLink,
+  Folder,
+  FolderOpen,
   RefreshCw,
   Rss,
   Search,
@@ -26,6 +28,7 @@ type FeedArticle = RouterOutputs["article"]["feed"]["items"][number];
 
 export function Feed() {
   const utils = api.useUtils();
+  const [folderId, setFolderId] = useState<string | undefined>();
   const [sourceId, setSourceId] = useState<string | undefined>();
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
@@ -37,8 +40,9 @@ export function Feed() {
   }, [q]);
 
   const sources = api.source.list.useQuery();
+  const folders = api.folder.list.useQuery();
   const feed = api.article.feed.useInfiniteQuery(
-    { sourceId, q: debouncedQ || undefined },
+    { folderId, sourceId, q: debouncedQ || undefined },
     { getNextPageParam: (last) => last.nextCursor },
   );
 
@@ -61,6 +65,24 @@ export function Feed() {
   }, [refreshMutate]);
 
   const items = feed.data?.pages.flatMap((p) => p.items) ?? [];
+
+  const hasFolders = (folders.data?.length ?? 0) > 0;
+  const unfiledCount =
+    sources.data?.filter((s) => !s.folderId).length ?? 0;
+  // Source tabs are scoped to the selected folder.
+  const visibleSources =
+    sources.data?.filter((s) =>
+      !folderId
+        ? true
+        : folderId === "unfiled"
+          ? !s.folderId
+          : s.folderId === folderId,
+    ) ?? [];
+
+  const selectFolder = (v: string) => {
+    setFolderId(v === "all" ? undefined : v);
+    setSourceId(undefined);
+  };
 
   return (
     <div className="space-y-5">
@@ -98,19 +120,54 @@ export function Feed() {
         </div>
       </div>
 
-      <Tabs
-        value={sourceId ?? "all"}
-        onValueChange={(v) => setSourceId(v === "all" ? undefined : String(v))}
-      >
-        <TabsList className="h-auto flex-wrap justify-start">
-          <TabsTrigger value="all">All sources</TabsTrigger>
-          {sources.data?.map((s) => (
-            <TabsTrigger key={s.id} value={s.id}>
-              {s.name}
+      <div className="space-y-2">
+        {hasFolders && (
+          <Tabs
+            value={folderId ?? "all"}
+            onValueChange={(v) => selectFolder(String(v))}
+          >
+            <TabsList className="h-auto flex-wrap justify-start">
+              <TabsTrigger value="all">
+                <FolderOpen data-icon="inline-start" /> All folders
+              </TabsTrigger>
+              {folders.data?.map((f) => (
+                <TabsTrigger key={f.id} value={f.id}>
+                  <Folder data-icon="inline-start" /> {f.name}
+                  <span className="text-muted-foreground ml-1 text-xs tabular-nums">
+                    {f._count.sources}
+                  </span>
+                </TabsTrigger>
+              ))}
+              {unfiledCount > 0 && (
+                <TabsTrigger value="unfiled">
+                  Unfiled
+                  <span className="text-muted-foreground ml-1 text-xs tabular-nums">
+                    {unfiledCount}
+                  </span>
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </Tabs>
+        )}
+
+        <Tabs
+          value={sourceId ?? "all"}
+          onValueChange={(v) =>
+            setSourceId(v === "all" ? undefined : String(v))
+          }
+        >
+          <TabsList className="h-auto flex-wrap justify-start">
+            <TabsTrigger value="all">
+              {folderId ? "All in folder" : "All sources"}
             </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+            {visibleSources.map((s) => (
+              <TabsTrigger key={s.id} value={s.id}>
+                {s.name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </div>
 
       {feed.isLoading ? (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
