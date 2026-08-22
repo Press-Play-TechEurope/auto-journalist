@@ -5,6 +5,7 @@ import {
   ExternalLink,
   Folder,
   FolderOpen,
+  Image as ImageIcon,
   RefreshCw,
   Rss,
   Search,
@@ -47,6 +48,7 @@ export function Feed() {
   const [sourceId, setSourceId] = useState<string | undefined>();
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
+  const [withImages, setWithImages] = useState(false);
   const [selected, setSelected] = useState<FeedArticle | null>(null);
 
   useEffect(() => {
@@ -59,7 +61,12 @@ export function Feed() {
   const starredCount = api.article.starredCount.useQuery();
   const star = useStar();
   const feed = api.article.feed.useInfiniteQuery(
-    { folderId, sourceId, q: debouncedQ || undefined },
+    {
+      folderId,
+      sourceId,
+      q: debouncedQ || undefined,
+      hasImage: withImages || undefined,
+    },
     { getNextPageParam: (last) => last.nextCursor },
   );
 
@@ -186,6 +193,18 @@ export function Feed() {
           onChange={setSourceId}
           scopedToFolder={Boolean(folderId) && !isStarredView}
         />
+        <Button
+          variant={withImages ? "secondary" : "outline"}
+          aria-pressed={withImages}
+          onClick={() => setWithImages((v) => !v)}
+          title={
+            withImages
+              ? "Showing only articles with images"
+              : "Hide articles without images"
+          }
+        >
+          <ImageIcon data-icon="inline-start" /> With images
+        </Button>
       </div>
 
       {feed.isLoading ? (
@@ -200,7 +219,7 @@ export function Feed() {
             <Star className="size-6" />
           </div>
           <p className="text-muted-foreground text-sm">
-            {debouncedQ || sourceId
+            {debouncedQ || sourceId || withImages
               ? "No starred articles match."
               : "Nothing starred yet — hit the star on any article to save it here."}
           </p>
@@ -214,17 +233,25 @@ export function Feed() {
             <Rss className="size-6" />
           </div>
           <p className="text-muted-foreground text-sm">
-            {sources.data?.length
-              ? "No articles yet — try refreshing."
-              : "Add an RSS source to get started."}
+            {withImages
+              ? "No articles with images match."
+              : sources.data?.length
+                ? "No articles yet — try refreshing."
+                : "Add an RSS source to get started."}
           </p>
-          <Button
-            variant="outline"
-            onClick={() => refresh.mutate({})}
-            disabled={refresh.isPending}
-          >
-            <RefreshCw data-icon="inline-start" /> Refresh feeds
-          </Button>
+          {withImages ? (
+            <Button variant="outline" onClick={() => setWithImages(false)}>
+              <ImageIcon data-icon="inline-start" /> Show all articles
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              onClick={() => refresh.mutate({})}
+              disabled={refresh.isPending}
+            >
+              <RefreshCw data-icon="inline-start" /> Refresh feeds
+            </Button>
+          )}
         </div>
       ) : (
         <>

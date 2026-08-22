@@ -17,12 +17,15 @@ async function searchArticles(
     q: string;
     sourceId?: string;
     folderId?: string;
+    hasImage?: boolean;
     offset: number;
     limit: number;
   },
 ) {
   const where: Prisma.Sql[] = [Prisma.sql`a."searchVector" @@ query`];
   if (input.sourceId) where.push(Prisma.sql`a."sourceId" = ${input.sourceId}`);
+  if (input.hasImage)
+    where.push(Prisma.sql`a."imageUrl" IS NOT NULL AND a."imageUrl" <> ''`);
   if (input.folderId === "starred")
     where.push(Prisma.sql`a."starredAt" IS NOT NULL`);
   else if (input.folderId === "unfiled")
@@ -68,6 +71,8 @@ export const articleRouter = createTRPCRouter({
            * results are ranked by relevance and the cursor is an offset.
            */
           q: z.string().trim().optional(),
+          /** Only articles that have a lead image. */
+          hasImage: z.boolean().optional(),
           cursor: z.string().optional(),
           limit: z.number().int().min(1).max(100).default(40),
         })
@@ -111,6 +116,9 @@ export const articleRouter = createTRPCRouter({
       const rows = await ctx.db.article.findMany({
         where: {
           sourceId: input.sourceId,
+          ...(input.hasImage
+            ? { NOT: [{ imageUrl: null }, { imageUrl: "" }] }
+            : {}),
           ...(input.folderId === "starred"
             ? { starredAt: { not: null } }
             : input.folderId
