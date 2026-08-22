@@ -5,6 +5,9 @@ import { env } from "~/env";
 import { appRouter } from "~/server/api/root";
 import { createTRPCContext } from "~/server/api/trpc";
 
+// Pipeline steps (article fetch, OpenAI, TTS) can take a while; allow up to 60s.
+export const maxDuration = 60;
+
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
  * handling a HTTP request (e.g. when you make requests from Client Components).

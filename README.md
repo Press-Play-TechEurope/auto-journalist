@@ -6,65 +6,102 @@ AI Newsroom — aggregate RSS news, enrich articles with AI, and turn them into 
 
 ## What it does
 
-auto-journalist is a web app that watches multiple news sources, helps you pick a story, and produces a short presenter-style video from it:
+auto-journalist is a single-tenant web app (one shared password) that watches multiple news sources, helps you pick a story, and produces a short presenter-style video from it:
 
-1. **Aggregate** — add any number of RSS feeds as sources. The app polls them, fetches new items, and shows a unified feed sorted by date, with stories from all sources interleaved.
-2. **Enrich** — click a news item to process it:
-   - The article is downloaded with a simple HTTP fetch.
-   - [Tavily Extract](https://docs.tavily.com/#extract-webpages) pulls structured context from the article URL — the gist, photos, and other metadata — which is stored in the database alongside the article.
-3. **Script** — the stored article content and metadata are sent to OpenAI to generate a spoken-word script for a news video.
-4. **Video** — the script and a reference image (the talking-head presenter) are handed to [Veed Fabric 1.0 via fal.ai](https://fal.ai/models/veed/fabric-1.0/api), which generates the video.
-5. **Publish** — the finished video can be posted to social media (X / Instagram).
+1. **Aggregate** — add any number of RSS feeds as sources. The app polls them (daily cron, on page load when stale, and on demand) and shows a unified feed sorted by date.
+2. **Enrich** — pick a story and a presenter, click **Generate video**:
+   - The article is downloaded with a plain HTTP fetch and reduced to text.
+   - [Tavily Extract](https://docs.tavily.com/#extract-webpages) pulls structured content + images from the URL (best-effort; falls back to the raw fetch).
+3. **Script** — the article content plus your org settings (brand name, tone, target length) go to OpenAI, which returns a spoken script **and** a social caption (structured output).
+4. **Voice** — the script goes through TTS on fal.ai (MiniMax Speech-02 by default; presenter-specific preset voice).
+5. **Video** — audio + presenter image go to [Veed Fabric 1.0 via fal.ai](https://fal.ai/models/veed/fabric-1.0/api), which renders the talking-head MP4.
+6. **Library & publish** — every generated item lands in the media library with its script and caption. Edit the script and **regenerate** the video, then **post to X / Instagram** (mocked for the demo — shows a success dialog with the post preview).
 
 ## Pipeline overview
 
 ```
 RSS feeds ──► unified feed (sorted by date)
-                 │ click a story
+                 │ pick a story + presenter
                  ▼
-        fetch article + Tavily Extract ──► DB (content + metadata)
+   fetch article + Tavily Extract ──► DB (content + metadata)
                  │
                  ▼
-        OpenAI ──► video script
+   OpenAI (structured output) ──► script + caption
                  │
                  ▼
-        TTS (script ──► audio) + reference image
+   fal.ai TTS (MiniMax) ──► audio_url ──┐
+   presenter image_url ─────────────────┤
+                                        ▼
+   Veed Fabric 1.0 (fal.ai queue) ──► talking-head MP4
                  │
                  ▼
-        Veed Fabric 1.0 (fal.ai) ──► talking-head video
-                 │
-                 ▼
-        Post to X / Instagram
+   Library (edit script ▸ regenerate) ──► Post to X / Instagram (mock)
 ```
+
+The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → GENERATING_AUDIO → GENERATING_VIDEO → READY | FAILED`). Each tRPC `media.advance` call runs **one bounded step** so it fits inside a serverless invocation; the browser keeps calling it until the item is terminal. Video rendering is submitted to the fal queue and polled. Generated audio/video stay on fal's CDN (`expiresIn: "never"`), so no separate object storage is needed.
 
 ## Integrations
 
 | Service | Purpose | Notes |
 |---|---|---|
-| RSS feeds | News ingestion | Multiple sources, polled periodically |
-| [Tavily Extract](https://docs.tavily.com/#extract-webpages) | Article enrichment | Structured context: gist, images, metadata |
-| OpenAI | Script generation | Turns article + metadata into a video script |
-| [Veed Fabric 1.0 (fal.ai)](https://fal.ai/models/veed/fabric-1.0/api) | Video generation | Input: `image_url` + `audio_url` + `resolution` (480p/720p); output: MP4 |
-| X / Instagram APIs | Publishing | Post the generated video |
+| RSS feeds | News ingestion | `rss-parser`; Vercel Cron daily + stale-on-load + manual refresh |
+| [Tavily Extract](https://docs.tavily.com/#extract-webpages) | Article enrichment | Markdown content + images; optional |
+| OpenAI | Script + caption | `gpt-4.1-mini`, Responses API with zod structured output |
+| [fal.ai TTS](https://fal.ai/explore/text-to-speech-apis) | Text → speech | `fal-ai/minimax/speech-02-hd` by default, preset voices per presenter |
+| [Veed Fabric 1.0 (fal.ai)](https://fal.ai/models/veed/fabric-1.0/api) | Video generation | `image_url` + `audio_url` + `resolution` → MP4 |
+| X / Instagram | Publishing | Mocked behind a `Publisher` interface (`src/server/lib/publish.ts`) |
 
-> **Note:** Veed Fabric takes an image and an **audio** file, not text — so the generated script goes through a text-to-speech step first (details to be decided during implementation).
+## Tech stack
+
+[T3 Stack](https://create.t3.gg/) — Next.js 15 (App Router), tRPC 11, Prisma 6 + Postgres, Tailwind 4, shadcn/ui (Base UI), TanStack Query. Hosted on Vercel; Postgres on Railway.
+
+```
+src/
+  app/(app)/            feed, library, library/[id], settings (RSC pages + client components)
+  app/login/            password gate (server action + signed cookie)
+  app/api/cron/         Vercel Cron target: poll feeds
+  middleware.ts         redirects to /login unless the session cookie verifies
+  server/pipeline.ts    generation state machine
+  server/lib/           rss, article-fetch, tavily, openai, fal, publish
+  server/api/routers/   source, article, media, presenter, config, publish
+prisma/schema.prisma    OrgConfig, Presenter, Source, Article, MediaItem, Publication
+prisma/seed.ts          4 presenters, 5 feeds, default config
+```
+
+## Local development
+
+```bash
+pnpm install
+cp .env.example .env          # fill in values (see below)
+./start-database.sh           # local Postgres via Docker (or point DATABASE_URL at Railway)
+pnpm db:push                  # create tables
+pnpm db:seed                  # presenters, feeds, org config
+pnpm dev
+```
+
+Then open http://localhost:3000 and sign in with `APP_PASSWORD`.
+
+### Environment variables
+
+| Var | Required | Purpose |
+|---|---|---|
+| `DATABASE_URL` | yes | Postgres connection string |
+| `APP_PASSWORD` | yes | Shared password for the login gate |
+| `AUTH_SECRET` | yes | ≥16 chars; signs the session cookie (`openssl rand -base64 32`) |
+| `CRON_SECRET` | recommended | Vercel sends `Authorization: Bearer <CRON_SECRET>` to the cron route |
+| `OPENAI_API_KEY` | for generation | Script + caption |
+| `TAVILY_API_KEY` | optional | Richer article extraction; falls back to raw fetch |
+| `FAL_KEY` | for generation | TTS + Fabric video |
+
+The app boots without the third-party keys; a generation will fail at the first step that needs a missing key, with the error shown on the item (and a Retry button).
+
+## Deploy (Vercel + Railway)
+
+1. Create a Postgres on Railway; copy its public `DATABASE_URL`.
+2. Import the repo on Vercel, set all env vars above.
+3. Build runs `prisma generate` via `postinstall`. Apply the schema once: `DATABASE_URL=... pnpm db:push && pnpm db:seed` from your machine (or add `prisma migrate deploy` to the build once you start using migrations).
+4. `vercel.json` registers the daily cron (`0 6 * * *` → `/api/cron/poll-feeds`). Hobby plan crons run at most once per day; the feed page also refreshes stale sources on load.
 
 ## Status
 
-Design phase — implementation starts next. Stack, database schema, and project layout are still to be decided.
-
-## Tech Stack
-
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
-
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-
-
-## How do I deploy this?
-
-Follow our deployment guides for [Railway](https://create.t3.gg/en/other-recs#railway).
+MVP implemented: feed, sources, pipeline, library, regenerate, mocked publishing, settings, cron, password gate. Not yet done: real X/Instagram adapters, presenter upload, multi-user auth.

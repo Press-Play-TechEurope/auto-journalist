@@ -46,7 +46,12 @@ export function StatusBadge({
     );
   if (status === "FAILED")
     return (
-      <Badge variant="destructive" className={cn("gap-1", className)}>
+      <Badge
+        className={cn(
+          "bg-destructive hover:bg-destructive gap-1 text-white",
+          className,
+        )}
+      >
         <XCircle className="size-3" /> Failed
       </Badge>
     );

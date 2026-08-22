@@ -135,7 +135,12 @@ export function MediaDetail({ id }: { id: string }) {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" render={<Link href="/library" />}>
+        <Button
+          variant="ghost"
+          size="sm"
+          render={<Link href="/library" />}
+          nativeButton={false}
+        >
           <ArrowLeft data-icon="inline-start" /> Library
         </Button>
         <StatusBadge status={item.status} />
@@ -155,7 +160,7 @@ export function MediaDetail({ id }: { id: string }) {
 
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
         {/* Left: video */}
-        <div className="space-y-4">
+        <div className="mx-auto w-full max-w-[360px] space-y-4 lg:mx-0">
           <div className="relative overflow-hidden rounded-xl border bg-black">
             {item.videoUrl ? (
               <video
@@ -255,7 +260,13 @@ export function MediaDetail({ id }: { id: string }) {
             </CardHeader>
             <CardContent className="space-y-3">
               {item.script == null ? (
-                <Skeleton className="h-32" />
+                busy ? (
+                  <Skeleton className="h-32" />
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    The script will appear here once it has been written.
+                  </p>
+                )
               ) : (
                 <Textarea
                   value={script}
@@ -316,7 +327,13 @@ export function MediaDetail({ id }: { id: string }) {
             </CardHeader>
             <CardContent className="space-y-3">
               {item.caption == null ? (
-                <Skeleton className="h-20" />
+                busy ? (
+                  <Skeleton className="h-20" />
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    A caption is generated together with the script.
+                  </p>
+                )
               ) : (
                 <Textarea
                   value={caption}

@@ -34,6 +34,7 @@ export function LibraryGrid() {
           className="ml-auto"
           variant="outline"
           render={<Link href="/" />}
+          nativeButton={false}
         >
           <Clapperboard data-icon="inline-start" /> Pick a story
         </Button>
@@ -56,7 +57,11 @@ export function LibraryGrid() {
           <p className="text-muted-foreground text-sm">
             No videos yet. Pick a story from the feed to generate one.
           </p>
-          <Button variant="outline" render={<Link href="/" />}>
+          <Button
+            variant="outline"
+            render={<Link href="/" />}
+            nativeButton={false}
+          >
             Go to feed
           </Button>
         </div>
