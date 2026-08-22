@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   Clapperboard,
   Mic,
   Newspaper,
@@ -63,7 +62,7 @@ function PillLink({
 }) {
   const tones = {
     dark: "bg-slate-900 text-white hover:bg-slate-800",
-    lime: "bg-[#dff24a] text-slate-900 hover:bg-[#e8f86a] shadow-[0_10px_30px_-10px_rgba(223,242,74,0.8)]",
+    lime: "bg-brand-lime text-slate-900 hover:bg-brand-lime-bright shadow-[0_10px_30px_-10px_rgba(223,242,74,0.8)]",
     light: "border border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
     ghost: "text-white/90 hover:text-white",
   };
@@ -133,17 +132,7 @@ export default function LandingPage() {
 
         {/* Hero copy */}
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center px-4 pt-14 pb-48 text-center sm:px-6 sm:pt-20 sm:pb-64">
-          <Link
-            href="/feed"
-            className="animate-in fade-in slide-in-from-bottom-2 flex items-center gap-2 rounded-full border border-white/15 bg-white/5 py-1 pr-3 pl-1 text-[12px] text-white/80 backdrop-blur duration-500 hover:bg-white/10"
-          >
-            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-900">
-              New
-            </span>
-            ElevenLabs voices for every presenter
-            <ArrowRight className="size-3" />
-          </Link>
-          <h1 className="animate-in fade-in slide-in-from-bottom-3 mt-7 max-w-3xl font-serif text-[44px] leading-[1.02] tracking-[-0.02em] text-balance delay-100 duration-500 sm:text-7xl">
+          <h1 className="animate-in fade-in slide-in-from-bottom-3 max-w-3xl font-serif text-[44px] leading-[1.02] tracking-[-0.02em] text-balance delay-100 duration-500 sm:text-7xl">
             Post about today&rsquo;s news without filming today
           </h1>
           <p className="animate-in fade-in slide-in-from-bottom-4 mt-6 max-w-lg text-[15px] leading-relaxed text-balance text-white/75 delay-200 duration-500 sm:text-base">
