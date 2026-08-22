@@ -62,9 +62,6 @@ export function PresenterPicker({
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white">
               <div className="text-sm leading-tight font-medium">{p.name}</div>
-              {!compact && p.bio && (
-                <div className="truncate text-[11px] opacity-80">{p.bio}</div>
-              )}
             </div>
             {selected && (
               <span className="bg-primary text-primary-foreground absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full">
