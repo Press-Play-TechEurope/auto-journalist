@@ -8,6 +8,7 @@ import {
 } from "~/server/lib/fal";
 import { generateScript } from "~/server/lib/openai";
 import { extractArticle } from "~/server/lib/tavily";
+import { isVoiceId } from "~/server/voices";
 
 export const TERMINAL: MediaStatus[] = ["READY", "FAILED"];
 
@@ -182,31 +183,47 @@ export async function startGeneration(opts: {
     throw new Error(
       "No presenter selected and no default presenter configured",
     );
-  const presenter = await db.presenter.findUniqueOrThrow({
-    where: { id: presenterId },
-  });
+  await db.presenter.findUniqueOrThrow({ where: { id: presenterId } });
 
   const created = await db.mediaItem.create({
     data: {
       articleId: opts.articleId,
       presenterId,
-      voiceId: opts.voiceId ?? presenter.voiceId,
+      voiceId: opts.voiceId ?? config.defaultVoiceId,
     },
   });
   return advance(created.id);
 }
 
-/** Re-run TTS + video with an edited script (keeps caption unless provided). */
+/**
+ * Re-run TTS + video with an edited script (keeps caption unless provided).
+ * Presenter and voice can be swapped at the same time; if the item's stored
+ * voice is no longer in the catalogue (e.g. a legacy provider id) and none is
+ * given, fall back to the org default.
+ */
 export async function regenerateVideo(
   id: string,
-  opts: { script: string; caption?: string },
+  opts: {
+    script: string;
+    caption?: string;
+    presenterId?: string;
+    voiceId?: string;
+  },
 ) {
+  let voiceId = opts.voiceId;
+  if (!voiceId) {
+    const item = await db.mediaItem.findUniqueOrThrow({ where: { id } });
+    if (!isVoiceId(item.voiceId))
+      voiceId = (await getOrgConfig()).defaultVoiceId;
+  }
   await db.mediaItem.update({
     where: { id },
     data: {
       status: "GENERATING_AUDIO",
       script: opts.script,
       caption: opts.caption,
+      presenterId: opts.presenterId,
+      voiceId,
       audioUrl: null,
       videoUrl: null,
       falRequestId: null,

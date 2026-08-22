@@ -14,42 +14,36 @@ const PRESENTERS = [
     name: "Zach",
     bio: "Anchor. Direct and conversational.",
     imageUrl: "/presenters/zach.jpg",
-    voiceId: "Patient_Man",
   },
   {
     key: "ty",
     name: "Ty",
     bio: "Co-anchor. Deep, steady voice.",
     imageUrl: "/presenters/ty.jpg",
-    voiceId: "Deep_Voice_Man",
   },
   {
     key: "eliska",
     name: "Eliska",
     bio: "Correspondent. Warm and upbeat.",
     imageUrl: "/presenters/eliska.jpg",
-    voiceId: "Calm_Woman",
   },
   {
     key: "maya",
     name: "Maya Chen",
     bio: "Lead anchor. Measured, authoritative delivery.",
     imageUrl: "/presenters/gpt1.png",
-    voiceId: "Wise_Woman",
   },
   {
     key: "daniel",
     name: "Daniel Okafor",
     bio: "Evening news. Deep, steady voice.",
     imageUrl: "/presenters/gpt2.png",
-    voiceId: "Deep_Voice_Man",
   },
   {
     key: "sofia",
     name: "Sofia Reyes",
     bio: "Tech & culture desk. Warm and upbeat.",
     imageUrl: "/presenters/gpt3.png",
-    voiceId: "Calm_Woman",
   },
   {
     key: "james",
@@ -57,7 +51,6 @@ const PRESENTERS = [
     bio: "Business correspondent. Crisp and direct.",
     imageUrl:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1024&q=80&fit=crop",
-    voiceId: "Patient_Man",
   },
 ];
 
@@ -114,14 +107,12 @@ async function main() {
           name: p.name,
           bio: p.bio,
           imageUrl: p.imageUrl,
-          voiceId: p.voiceId,
           sortOrder: i,
         },
         update: {
           name: p.name,
           bio: p.bio,
           imageUrl: p.imageUrl,
-          voiceId: p.voiceId,
           sortOrder: i,
         },
       }),

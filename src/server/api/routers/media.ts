@@ -46,12 +46,16 @@ export const mediaRouter = createTRPCRouter({
         id: z.string(),
         script: z.string().trim().min(10),
         caption: z.string().optional(),
+        presenterId: z.string().optional(),
+        voiceId: z.string().optional(),
       }),
     )
     .mutation(({ input }) =>
       regenerateVideo(input.id, {
         script: input.script,
         caption: input.caption,
+        presenterId: input.presenterId,
+        voiceId: input.voiceId,
       }),
     ),
 

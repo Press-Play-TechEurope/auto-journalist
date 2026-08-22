@@ -13,6 +13,7 @@ export const configRouter = createTRPCRouter({
         tone: z.string().trim().min(1).max(2000),
         targetSeconds: z.number().int().min(15).max(180),
         defaultPresenterId: z.string().nullable(),
+        defaultVoiceId: z.string().trim().min(1),
         ttsModel: z.string().trim().min(1),
       }),
     )

@@ -24,24 +24,35 @@ import {
 } from "~/components/ui/select";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
-import { voiceLabel } from "~/server/voices";
+import { VoicePicker } from "~/components/voice-picker";
 import { api } from "~/trpc/react";
 
 const TTS_MODELS = [
   {
+    value: "fal-ai/elevenlabs/tts/multilingual-v2",
+    label: "ElevenLabs Multilingual v2 (fal.ai)",
+  },
+  {
+    value: "fal-ai/elevenlabs/tts/turbo-v2.5",
+    label: "ElevenLabs Turbo v2.5 (fal.ai)",
+  },
+  {
+    value: "fal-ai/elevenlabs/tts/eleven-v3",
+    label: "ElevenLabs Eleven v3 (fal.ai)",
+  },
+  {
     value: "fal-ai/minimax/speech-02-hd",
-    label: "MiniMax Speech-02 HD (fal.ai)",
+    label: "MiniMax Speech-02 HD (fal.ai) — legacy voices",
   },
   {
     value: "fal-ai/minimax/speech-02-turbo",
-    label: "MiniMax Speech-02 Turbo (fal.ai)",
+    label: "MiniMax Speech-02 Turbo (fal.ai) — legacy voices",
   },
 ];
 
 export function SettingsForm() {
   const utils = api.useUtils();
   const config = api.config.get.useQuery();
-  const presenters = api.presenter.list.useQuery();
 
   const [brandName, setBrandName] = useState("");
   const [tone, setTone] = useState("");
@@ -49,6 +60,7 @@ export function SettingsForm() {
   const [defaultPresenterId, setDefaultPresenterId] = useState<
     string | undefined
   >();
+  const [defaultVoiceId, setDefaultVoiceId] = useState<string | undefined>();
   const [ttsModel, setTtsModel] = useState(TTS_MODELS[0]!.value);
 
   useEffect(() => {
@@ -57,6 +69,7 @@ export function SettingsForm() {
     setTone(config.data.tone);
     setTargetSeconds(config.data.targetSeconds);
     setDefaultPresenterId(config.data.defaultPresenterId ?? undefined);
+    setDefaultVoiceId(config.data.defaultVoiceId);
     setTtsModel(config.data.ttsModel);
   }, [config.data]);
 
@@ -69,6 +82,7 @@ export function SettingsForm() {
   });
 
   if (!config.data) return <Skeleton className="h-96 rounded-xl" />;
+  const canSave = !!defaultVoiceId && !update.isPending;
 
   return (
     <form
@@ -80,18 +94,21 @@ export function SettingsForm() {
           tone,
           targetSeconds,
           defaultPresenterId: defaultPresenterId ?? null,
+          defaultVoiceId: defaultVoiceId!,
           ttsModel,
         });
       }}
     >
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Settings</h1>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
+            Settings
+          </h1>
           <p className="text-muted-foreground text-sm">
             Org-wide defaults used for every generated video.
           </p>
         </div>
-        <Button type="submit" className="ml-auto" disabled={update.isPending}>
+        <Button type="submit" className="ml-auto" disabled={!canSave}>
           <Save data-icon="inline-start" /> Save
         </Button>
       </div>
@@ -159,24 +176,27 @@ export function SettingsForm() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Default presenter</CardTitle>
+            <CardTitle>Defaults</CardTitle>
             <CardDescription>
-              Pre-selected when generating; each presenter has a default voice.
+              Pre-selected when generating a video. Presenter and voice are
+              independent — mix and match per video.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <PresenterPicker
-              value={defaultPresenterId}
-              onChange={setDefaultPresenterId}
-            />
-            <ul className="text-muted-foreground space-y-1 text-sm">
-              {presenters.data?.map((p) => (
-                <li key={p.id}>
-                  <span className="text-foreground font-medium">{p.name}</span>{" "}
-                  — {p.bio} Voice: {voiceLabel(p.voiceId)}.
-                </li>
-              ))}
-            </ul>
+          <CardContent className="space-y-5">
+            <div className="space-y-2">
+              <Label>Default presenter</Label>
+              <PresenterPicker
+                value={defaultPresenterId}
+                onChange={setDefaultPresenterId}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Default voice</Label>
+              <VoicePicker
+                value={defaultVoiceId}
+                onChange={setDefaultVoiceId}
+              />
+            </div>
           </CardContent>
         </Card>
       </div>

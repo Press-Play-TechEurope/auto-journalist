@@ -29,7 +29,17 @@ export async function synthesizeSpeech(opts: {
   voiceId: string;
 }): Promise<{ audioUrl: string; durationMs?: number }> {
   const input: Record<string, unknown> = { text: opts.text.slice(0, 5000) };
-  if (opts.model.startsWith("fal-ai/minimax/")) {
+  if (opts.model.startsWith("fal-ai/elevenlabs/")) {
+    // `voice` is an ElevenLabs voice name or voice_id.
+    input.voice = opts.voiceId;
+    input.stability = 0.5;
+    input.apply_text_normalization = "on";
+    if (!opts.model.endsWith("/eleven-v3")) {
+      // eleven-v3 only exposes `stability`.
+      input.similarity_boost = 0.75;
+      input.speed = 1;
+    }
+  } else if (opts.model.startsWith("fal-ai/minimax/")) {
     input.voice_setting = {
       voice_id: opts.voiceId,
       speed: 1,

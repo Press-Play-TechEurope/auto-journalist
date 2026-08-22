@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { PresenterPicker } from "~/components/presenter-picker";
 import { StatusBadge } from "~/components/status-badge";
+import { VoicePicker } from "~/components/voice-picker";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -32,10 +33,13 @@ export function ArticleDialog({
   const router = useRouter();
   const config = api.config.get.useQuery();
   const [presenterId, setPresenterId] = useState<string | undefined>();
+  const [voiceId, setVoiceId] = useState<string | undefined>();
 
   useEffect(() => {
-    if (article) setPresenterId(config.data?.defaultPresenterId ?? undefined);
-  }, [article, config.data?.defaultPresenterId]);
+    if (!article) return;
+    setPresenterId(config.data?.defaultPresenterId ?? undefined);
+    setVoiceId(config.data?.defaultVoiceId);
+  }, [article, config.data?.defaultPresenterId, config.data?.defaultVoiceId]);
 
   const start = api.media.start.useMutation({
     onSuccess: (item) => {
@@ -94,6 +98,11 @@ export function ArticleDialog({
               <PresenterPicker value={presenterId} onChange={setPresenterId} />
             </div>
 
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Voice</p>
+              <VoicePicker value={voiceId} onChange={setVoiceId} />
+            </div>
+
             <DialogFooter className="items-center">
               {existing && (
                 <Link
@@ -108,9 +117,9 @@ export function ArticleDialog({
               </Button>
               <Button
                 onClick={() =>
-                  start.mutate({ articleId: article.id, presenterId })
+                  start.mutate({ articleId: article.id, presenterId, voiceId })
                 }
-                disabled={start.isPending || !presenterId}
+                disabled={start.isPending || !presenterId || !voiceId}
               >
                 {start.isPending ? (
                   <Loader2 data-icon="inline-start" className="animate-spin" />

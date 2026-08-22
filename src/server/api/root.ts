@@ -5,6 +5,7 @@ import { mediaRouter } from "~/server/api/routers/media";
 import { presenterRouter } from "~/server/api/routers/presenter";
 import { publishRouter } from "~/server/api/routers/publish";
 import { sourceRouter } from "~/server/api/routers/source";
+import { voiceRouter } from "~/server/api/routers/voice";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   article: articleRouter,
   media: mediaRouter,
   presenter: presenterRouter,
+  voice: voiceRouter,
   config: configRouter,
   publish: publishRouter,
 });

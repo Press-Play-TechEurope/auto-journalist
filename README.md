@@ -11,7 +11,7 @@ Made for the masses and the young. Articles in, vibes out.
 APIs used:
 - Tavily Extract (for extracting article content and images)
 - OpenAI (for generating scripts and captions)
-- fal.ai (for TTS and Video Generation)
+- fal.ai (for TTS via ElevenLabs, and Video Generation)
 - VEED (model: Fabric 1.0)
 
 ## What it does
@@ -23,7 +23,7 @@ Press Play is a single-tenant web app (one shared password — it's a newsroom, 
    - The article is downloaded with a plain HTTP fetch and reduced to text.
    - [Tavily Extract](https://docs.tavily.com/#extract-webpages) pulls structured content + images from the URL (best-effort; falls back to the raw fetch).
 3. **Script** — the article content plus your org settings (brand name, tone, target length) go to OpenAI, which returns a spoken script **and** a social caption (structured output). Dense press release in, snappy script out.
-4. **Voice** — the script goes through TTS on fal.ai (MiniMax Speech-02 by default; presenter-specific preset voice).
+4. **Voice** — the script goes through TTS on fal.ai (ElevenLabs Multilingual v2 by default). Voices are independent of presenters: pick any voice for any face, per video, and swap either when regenerating.
 5. **Video** — audio + presenter image go to [Veed Fabric 1.0 via fal.ai](https://fal.ai/models/veed/fabric-1.0/api), which renders the talking-head MP4.
 6. **Library & publish** — every generated item lands in the media library with its script and caption. Edit the script and **regenerate** the video, then **post to X / Instagram** (mocked for the demo — shows a success dialog with the post preview).
 
@@ -39,7 +39,7 @@ RSS feeds ──► unified feed (sorted by date)
    OpenAI (structured output) ──► script + caption
                  │
                  ▼
-   fal.ai TTS (MiniMax) ──► audio_url ──┐
+   fal.ai TTS (ElevenLabs) ──► audio_url ─┐
    presenter image_url ─────────────────┤
                                         ▼
    Veed Fabric 1.0 (fal.ai queue) ──► talking-head MP4
@@ -65,7 +65,7 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 | RSS feeds | News ingestion | `rss-parser`; manual refresh + stale-on-load (no cron) |
 | [Tavily Extract](https://docs.tavily.com/#extract-webpages) | Article enrichment | Markdown content + images; optional |
 | OpenAI | Script + caption | `gpt-5.6-terra`, Responses API with zod structured output |
-| [fal.ai TTS](https://fal.ai/explore/text-to-speech-apis) | Text → speech | `fal-ai/minimax/speech-02-hd` by default, preset voices per presenter |
+| [fal.ai TTS](https://fal.ai/models/fal-ai/elevenlabs/tts/multilingual-v2/api) | Text → speech | `fal-ai/elevenlabs/tts/multilingual-v2` by default (turbo-v2.5 / eleven-v3 / legacy MiniMax selectable); curated ElevenLabs preset voices in `src/server/voices.ts`, chosen per video |
 | [Veed Fabric 1.0 (fal.ai)](https://fal.ai/models/veed/fabric-1.0/api) | Video generation | `image_url` + `audio_url` + `resolution` → MP4 |
 | X / Instagram | Publishing | Mocked behind a `Publisher` interface (`src/server/lib/publish.ts`) |
 
@@ -81,7 +81,7 @@ src/
   middleware.ts         redirects to /login unless the session cookie verifies (/ is public)
   server/pipeline.ts    generation state machine
   server/lib/           rss, article-fetch, tavily, openai, fal, publish
-  server/api/routers/   source, folder, article, media, presenter, config, publish
+  server/api/routers/   source, folder, article, media, presenter, voice, config, publish
 prisma/schema.prisma    OrgConfig, Presenter, Folder, Source, Article, MediaItem, Publication
 prisma/seed.ts          4 presenters, 5 feeds, default config
 ```

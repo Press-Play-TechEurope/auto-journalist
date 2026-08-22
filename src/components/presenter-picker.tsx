@@ -4,17 +4,18 @@ import { Check } from "lucide-react";
 
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
-import { voiceLabel } from "~/server/voices";
 import { api } from "~/trpc/react";
 
 export function PresenterPicker({
   value,
   onChange,
   compact = false,
+  disabled = false,
 }: {
   value: string | undefined;
   onChange: (id: string) => void;
   compact?: boolean;
+  disabled?: boolean;
 }) {
   const presenters = api.presenter.list.useQuery();
   if (!presenters.data) {
@@ -44,9 +45,10 @@ export function PresenterPicker({
           <button
             key={p.id}
             type="button"
+            disabled={disabled}
             onClick={() => onChange(p.id)}
             className={cn(
-              "group focus-visible:ring-ring/50 relative overflow-hidden rounded-lg border text-left transition-all focus-visible:ring-3 focus-visible:outline-none",
+              "group focus-visible:ring-ring/50 relative overflow-hidden rounded-lg border text-left transition-all focus-visible:ring-3 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
               selected
                 ? "border-primary ring-primary/30 ring-2"
                 : "hover:border-foreground/30",
@@ -60,10 +62,8 @@ export function PresenterPicker({
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white">
               <div className="text-sm leading-tight font-medium">{p.name}</div>
-              {!compact && (
-                <div className="text-[11px] opacity-80">
-                  {voiceLabel(p.voiceId)}
-                </div>
+              {!compact && p.bio && (
+                <div className="truncate text-[11px] opacity-80">{p.bio}</div>
               )}
             </div>
             {selected && (

@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { PresenterPicker } from "~/components/presenter-picker";
 import {
   isTerminal,
   STATUS_LABEL,
@@ -41,10 +42,11 @@ import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
+import { VoicePicker } from "~/components/voice-picker";
 import { usePipelineDriver } from "~/hooks/use-pipeline";
 import { hostname, timeAgo, wordCount } from "~/lib/format";
 import { cn } from "~/lib/utils";
-import { voiceLabel } from "~/server/voices";
+import { isVoiceId, voiceLabel } from "~/server/voices";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { type Platform } from "../../../../../../generated/prisma";
 
@@ -61,11 +63,14 @@ export function MediaDetail({ id }: { id: string }) {
   const router = useRouter();
   const utils = api.useUtils();
   const query = api.media.byId.useQuery({ id });
+  const config = api.config.get.useQuery();
   const item = query.data;
   usePipelineDriver(item);
 
   const [script, setScript] = useState("");
   const [caption, setCaption] = useState("");
+  const [presenterId, setPresenterId] = useState<string | undefined>();
+  const [voiceId, setVoiceId] = useState<string | undefined>();
   const [successPub, setSuccessPub] = useState<Publication | null>(null);
 
   // Sync editors when server copy changes (e.g. after scripting finishes).
@@ -75,6 +80,17 @@ export function MediaDetail({ id }: { id: string }) {
   useEffect(() => {
     if (item?.caption != null) setCaption(item.caption);
   }, [item?.caption]);
+  // Re-record pickers follow the item; a legacy voice id falls back to the
+  // org default so the picker always has a valid selection.
+  useEffect(() => {
+    if (item) setPresenterId(item.presenterId);
+  }, [item?.presenterId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!item) return;
+    setVoiceId(
+      isVoiceId(item.voiceId) ? item.voiceId : config.data?.defaultVoiceId,
+    );
+  }, [item?.voiceId, config.data?.defaultVoiceId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refetch = () => {
     void utils.media.byId.invalidate({ id });
@@ -90,7 +106,7 @@ export function MediaDetail({ id }: { id: string }) {
   const regenerate = api.media.regenerate.useMutation({
     onSuccess: (data) => {
       utils.media.byId.setData({ id }, data);
-      toast.success("Re-recording with the edited script…");
+      toast.success("Re-recording…");
     },
     onError: (e) => toast.error(e.message),
   });
@@ -129,6 +145,9 @@ export function MediaDetail({ id }: { id: string }) {
 
   const scriptDirty = script !== (item.script ?? "");
   const captionDirty = caption !== (item.caption ?? "");
+  const castDirty =
+    (presenterId != null && presenterId !== item.presenterId) ||
+    (voiceId != null && voiceId !== item.voiceId);
   const busy = !isTerminal(item.status);
   const publishedOn = new Set(item.publications.map((p) => p.platform));
 
@@ -276,37 +295,72 @@ export function MediaDetail({ id }: { id: string }) {
                   disabled={busy}
                 />
               )}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => save.mutate({ id, script })}
-                  disabled={!scriptDirty || busy || save.isPending}
-                >
-                  <Save data-icon="inline-start" /> Save script
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    regenerate.mutate({
-                      id,
-                      script,
-                      caption: captionDirty ? caption : undefined,
-                    })
-                  }
-                  disabled={
-                    busy || regenerate.isPending || wordCount(script) < 3
-                  }
-                >
-                  <RefreshCw
-                    data-icon="inline-start"
-                    className={regenerate.isPending ? "animate-spin" : ""}
-                  />
-                  {scriptDirty
-                    ? "Regenerate video with edited script"
-                    : "Regenerate video"}
-                </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => save.mutate({ id, script })}
+                disabled={!scriptDirty || busy || save.isPending}
+              >
+                <Save data-icon="inline-start" /> Save script
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Re-record</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs">
+                  Presenter
+                </Label>
+                <PresenterPicker
+                  compact
+                  value={presenterId}
+                  onChange={setPresenterId}
+                  disabled={busy}
+                />
               </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs">Voice</Label>
+                <VoicePicker
+                  value={voiceId}
+                  onChange={setVoiceId}
+                  disabled={busy}
+                />
+              </div>
+              <Button
+                size="sm"
+                onClick={() =>
+                  regenerate.mutate({
+                    id,
+                    script,
+                    caption: captionDirty ? caption : undefined,
+                    presenterId,
+                    voiceId,
+                  })
+                }
+                disabled={
+                  busy ||
+                  regenerate.isPending ||
+                  wordCount(script) < 3 ||
+                  !presenterId ||
+                  !voiceId
+                }
+              >
+                <RefreshCw
+                  data-icon="inline-start"
+                  className={regenerate.isPending ? "animate-spin" : ""}
+                />
+                {scriptDirty && castDirty
+                  ? "Regenerate with edited script & new cast"
+                  : scriptDirty
+                    ? "Regenerate video with edited script"
+                    : castDirty
+                      ? "Regenerate video with new cast"
+                      : "Regenerate video"}
+              </Button>
             </CardContent>
           </Card>
 
