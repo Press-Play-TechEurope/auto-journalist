@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, verifySessionToken } from "~/server/auth";
 
 /** Paths that never require a session. */
-const PUBLIC_PREFIXES = ["/login", "/api/auth", "/api/cron"];
+const PUBLIC_PREFIXES = ["/login", "/api/auth"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

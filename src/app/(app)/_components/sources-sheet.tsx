@@ -62,7 +62,7 @@ export function SourcesSheet() {
           <SheetHeader>
             <SheetTitle>RSS sources</SheetTitle>
             <SheetDescription>
-              Feeds are polled daily, on page load when stale, and on demand.
+              Feeds are polled when you open the app (if stale) and whenever you hit refresh.
             </SheetDescription>
           </SheetHeader>
 

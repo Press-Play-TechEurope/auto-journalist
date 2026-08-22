@@ -54,7 +54,7 @@ export function Feed() {
     onError: (e) => toast.error(e.message),
   });
 
-  // Refresh stale feeds on first load (cron only runs daily on Hobby).
+  // Refresh stale feeds on first load.
   const { mutate: refreshMutate } = refresh;
   useEffect(() => {
     refreshMutate({ staleMinutes: 30 });

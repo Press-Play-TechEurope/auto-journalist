@@ -16,8 +16,6 @@ export const env = createEnv({
     APP_PASSWORD: z.string().min(1),
     /** Secret used to sign the session cookie (>= 16 chars). */
     AUTH_SECRET: z.string().min(16),
-    /** Protects the cron endpoint (Vercel sends it as a Bearer token). */
-    CRON_SECRET: z.string().min(1).optional(),
 
     // Third-party services. Optional so the app boots without them; the
     // pipeline fails with a clear message if a step needs a missing key.
@@ -44,7 +42,6 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     APP_PASSWORD: process.env.APP_PASSWORD,
     AUTH_SECRET: process.env.AUTH_SECRET,
-    CRON_SECRET: process.env.CRON_SECRET,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     TAVILY_API_KEY: process.env.TAVILY_API_KEY,
     FAL_KEY: process.env.FAL_KEY,

@@ -8,7 +8,7 @@ AI Newsroom — aggregate RSS news, enrich articles with AI, and turn them into 
 
 auto-journalist is a single-tenant web app (one shared password) that watches multiple news sources, helps you pick a story, and produces a short presenter-style video from it:
 
-1. **Aggregate** — add any number of RSS feeds as sources. The app polls them (daily cron, on page load when stale, and on demand) and shows a unified feed sorted by date.
+1. **Aggregate** — add any number of RSS feeds as sources. The app polls them on demand (Refresh button, and automatically on page load when stale) and shows a unified feed sorted by date.
 2. **Enrich** — pick a story and a presenter, click **Generate video**:
    - The article is downloaded with a plain HTTP fetch and reduced to text.
    - [Tavily Extract](https://docs.tavily.com/#extract-webpages) pulls structured content + images from the URL (best-effort; falls back to the raw fetch).
@@ -44,7 +44,7 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 
 | Service | Purpose | Notes |
 |---|---|---|
-| RSS feeds | News ingestion | `rss-parser`; Vercel Cron daily + stale-on-load + manual refresh |
+| RSS feeds | News ingestion | `rss-parser`; manual refresh + stale-on-load (no cron) |
 | [Tavily Extract](https://docs.tavily.com/#extract-webpages) | Article enrichment | Markdown content + images; optional |
 | OpenAI | Script + caption | `gpt-4.1-mini`, Responses API with zod structured output |
 | [fal.ai TTS](https://fal.ai/explore/text-to-speech-apis) | Text → speech | `fal-ai/minimax/speech-02-hd` by default, preset voices per presenter |
@@ -59,7 +59,6 @@ The pipeline is a small state machine (`QUEUED → ENRICHING → SCRIPTING → G
 src/
   app/(app)/            feed, library, library/[id], settings (RSC pages + client components)
   app/login/            password gate (server action + signed cookie)
-  app/api/cron/         Vercel Cron target: poll feeds
   middleware.ts         redirects to /login unless the session cookie verifies
   server/pipeline.ts    generation state machine
   server/lib/           rss, article-fetch, tavily, openai, fal, publish
@@ -88,7 +87,6 @@ Then open http://localhost:3000 and sign in with `APP_PASSWORD`.
 | `DATABASE_URL` | yes | Postgres connection string |
 | `APP_PASSWORD` | yes | Shared password for the login gate |
 | `AUTH_SECRET` | yes | ≥16 chars; signs the session cookie (`openssl rand -base64 32`) |
-| `CRON_SECRET` | recommended | Vercel sends `Authorization: Bearer <CRON_SECRET>` to the cron route |
 | `OPENAI_API_KEY` | for generation | Script + caption |
 | `TAVILY_API_KEY` | optional | Richer article extraction; falls back to raw fetch |
 | `FAL_KEY` | for generation | TTS + Fabric video |
@@ -100,8 +98,7 @@ The app boots without the third-party keys; a generation will fail at the first 
 1. Create a Postgres on Railway; copy its public `DATABASE_URL`.
 2. Import the repo on Vercel, set all env vars above.
 3. Build runs `prisma generate` via `postinstall`. Apply the schema once: `DATABASE_URL=... pnpm db:push && pnpm db:seed` from your machine (or add `prisma migrate deploy` to the build once you start using migrations).
-4. `vercel.json` registers the daily cron (`0 6 * * *` → `/api/cron/poll-feeds`). Hobby plan crons run at most once per day; the feed page also refreshes stale sources on load.
 
 ## Status
 
-MVP implemented: feed, sources, pipeline, library, regenerate, mocked publishing, settings, cron, password gate. Not yet done: real X/Instagram adapters, presenter upload, multi-user auth.
+MVP implemented: feed, sources, pipeline, library, regenerate, mocked publishing, settings, password gate. Not yet done: real X/Instagram adapters, presenter upload, multi-user auth.
