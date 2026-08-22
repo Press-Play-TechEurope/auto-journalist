@@ -32,3 +32,7 @@ COMMIT;
 --   ALTER TABLE "Presenter" ADD COLUMN "voiceId" TEXT NOT NULL DEFAULT 'Wise_Woman';
 --   ALTER TABLE "OrgConfig" DROP COLUMN "defaultVoiceId";
 --   ALTER TABLE "OrgConfig" ALTER COLUMN "ttsModel" SET DEFAULT 'fal-ai/minimax/speech-02-hd';
+
+-- Follow-up (applied separately via TablePlus): presenter blurbs are no longer
+-- shown now that voices are picked independently.
+-- ALTER TABLE "Presenter" DROP COLUMN "bio";
