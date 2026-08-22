@@ -1,5 +1,7 @@
 # auto-journalist
 
+> https://auto-journalist.vercel.app/
+
 AI Newsroom — aggregate RSS news, enrich articles with AI, and turn them into talking-head videos ready for social media.
 
 ## What it does
